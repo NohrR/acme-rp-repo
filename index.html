@@ -9,24 +9,37 @@
 
   <style>
     :root{
+      /* ====== Resolution-aware scaling ======
+         Baseline: ~1920x1080 => ~16px
+         2560x1440 grows noticeably
+         Capped for ultra-high res
+      */
+      --base: clamp(16px, 0.55vw + 0.35vh, 22px);
+
       --bg: #ffffff;
       --panel: rgba(255,255,255,0.78);
       --panel2: rgba(248,248,248,0.82);
       --text: #0f172a;
       --muted: #475569;
       --border: rgba(15, 23, 42, 0.10);
-      --shadow: 0 18px 60px rgba(2, 6, 23, 0.12);
-      --radius: 18px;
-      --max: 1120px;
+      --shadow: 0 1.125rem 3.75rem rgba(2, 6, 23, 0.12);
+      --radius: 1.125rem;
+      --max: 70rem; /* 1120px / 16 */
     }
 
     *{ box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
+
+    html{
+      font-size: var(--base);
+      scroll-behavior: smooth;
+    }
+
     body{
-        font-family: Tahoma, sans-serif;
-        color: var(--text);
-        background: linear-gradient(180deg, #ffffff 0%, #f6f7fb 45%, #ffffff 100%);
-        overflow-x: hidden;
+      font-family: Tahoma, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #ffffff 0%, #f6f7fb 45%, #ffffff 100%);
+      overflow-x: hidden;
     }
 
     .gradient-word{
@@ -52,8 +65,8 @@
       z-index: 1;
       pointer-events: none;
       background:
-        radial-gradient(1200px 800px at 20% 15%, rgba(255,255,255,0.65), rgba(255,255,255,0) 60%),
-        radial-gradient(1000px 700px at 70% 10%, rgba(255,255,255,0.60), rgba(255,255,255,0) 55%),
+        radial-gradient(75rem 50rem at 20% 15%, rgba(255,255,255,0.65), rgba(255,255,255,0) 60%),
+        radial-gradient(62.5rem 43.75rem at 70% 10%, rgba(255,255,255,0.60), rgba(255,255,255,0) 55%),
         linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.35));
     }
 
@@ -67,7 +80,7 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(0.875rem);
       background: rgba(255,255,255,0.6);
       border-bottom: 1px solid var(--border);
     }
@@ -75,38 +88,32 @@
     .nav{
       max-width: var(--max);
       margin: 0 auto;
-      padding: 14px 18px;
+      padding: 0.875rem 1.125rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 0.875rem;
     }
 
     .brand{
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.625rem;
       font-weight: 800;
       letter-spacing: -0.02em;
     }
     .logo{
-      width: 50px;
-      height: 50px;
+      width: 3.125rem;
+      height: 3.125rem;
       position: relative;
       overflow: hidden;
-    }
-    .logo::before{
-      content:"";
-      position:absolute;
-      inset:-40%;
-      background: conic-gradient(from 180deg, rgba(2,6,23,0.0), rgba(2,6,23,0.18), rgba(2,6,23,0.0));
-      transform: rotate(10deg);
+      display:block;
     }
 
     .links{
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 0.875rem;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
@@ -114,9 +121,9 @@
       text-decoration: none;
       color: var(--muted);
       font-weight: 600;
-      font-size: 14px;
-      padding: 10px 12px;
-      border-radius: 12px;
+      font-size: 0.875rem;
+      padding: 0.625rem 0.75rem;
+      border-radius: 0.75rem;
       border: 1px solid transparent;
       transition: 180ms ease;
     }
@@ -130,27 +137,30 @@
       text-decoration: none;
       font-weight: 800;
       color: var(--text);
-      padding: 10px 14px;
-      border-radius: 14px;
+      padding: 0.625rem 0.875rem;
+      border-radius: 0.875rem;
       border: 1px solid var(--border);
       background: linear-gradient(180deg, #ffffff, #f6f7fb);
-      box-shadow: 0 10px 30px rgba(2,6,23,0.10);
+      box-shadow: 0 0.625rem 1.875rem rgba(2,6,23,0.10);
       transition: transform 180ms ease, box-shadow 180ms ease;
       white-space: nowrap;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
     }
     .btn:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 14px 40px rgba(2,6,23,0.14);
+      transform: translateY(-0.0625rem);
+      box-shadow: 0 0.875rem 2.5rem rgba(2,6,23,0.14);
     }
 
     .wrap{
       max-width: var(--max);
       margin: 0 auto;
-      padding: 0 18px;
+      padding: 0 1.125rem;
     }
 
     .hero{
-      padding: clamp(56px, 8vh, 92px) 0 24px;
+      padding: clamp(3.5rem, 8vh, 5.75rem) 0 1.5rem;
       min-height: 95vh;
       display: grid;
       align-items: center;
@@ -159,14 +169,13 @@
     .hero-grid{
       display: grid;
       grid-template-columns: 1.25fr 0.75fr;
-      gap: 18px;
+      gap: 1.125rem;
       align-items: start;
 
-      /* ✅ moved up a tiny bit */
-      transform: translateY(-10px);
+      transform: translateY(-0.625rem);
     }
 
-    @media (max-width: 980px){
+    @media (max-width: 61.25rem){
       .hero-grid{ grid-template-columns: 1fr; }
     }
 
@@ -175,52 +184,52 @@
       border-radius: var(--radius);
       background: var(--panel);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(0.875rem);
     }
 
-    .hero-card{ padding: 26px; }
+    .hero-card{ padding: 1.625rem; }
 
     .kicker{
       display:inline-flex;
       align-items:center;
-      gap: 8px;
+      gap: 0.5rem;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 0.8125rem;
       color: #0f172a;
       border: 1px solid var(--border);
-      padding: 7px 10px;
+      padding: 0.4375rem 0.625rem;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.8);
-      margin-bottom: 14px;
+      margin-bottom: 0.875rem;
     }
     .dot{
-      width: 8px; height: 8px;
+      width: 0.5rem; height: 0.5rem;
       border-radius: 999px;
       background: #8ec5ff;
       opacity: 1;
     }
 
     h1{
-      font-size: clamp(34px, 4.2vw, 54px);
+      font-size: clamp(2.125rem, 4.2vw, 3.375rem);
       line-height: 1.02;
       letter-spacing: -0.045em;
-      margin-bottom: 14px;
+      margin-bottom: 0.875rem;
     }
 
     .lead{
-      font-size: clamp(15px, 1.35vw, 18px);
+      font-size: clamp(0.95rem, 1.35vw, 1.125rem);
       color: var(--muted);
       line-height: 1.6;
-      margin-bottom: 18px;
+      margin-bottom: 1.125rem;
       max-width: 62ch;
     }
 
     .hero-actions{
       display: flex;
-      gap: 10px;
+      gap: 0.625rem;
       flex-wrap: wrap;
       align-items: center;
-      margin: 10px 0 18px;
+      margin: 0.625rem 0 1.125rem;
     }
 
     .btn-primary{
@@ -234,60 +243,60 @@
     }
 
     .hint{
-      margin-top: 14px;
-      font-size: 13px;
+      margin-top: 0.875rem;
+      font-size: 0.8125rem;
       color: rgba(71,85,105,0.95);
       display:flex;
       align-items:center;
-      gap: 10px;
+      gap: 0.625rem;
     }
     .hint kbd{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 12px;
-      padding: 5px 8px;
-      border-radius: 10px;
+      font-size: 0.75rem;
+      padding: 0.3125rem 0.5rem;
+      border-radius: 0.625rem;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.85);
     }
 
     .side-card{
-      padding: 18px;
+      padding: 1.125rem;
       background: var(--panel2);
     }
     .stat{
-      padding: 14px;
-      border-radius: 16px;
+      padding: 0.875rem;
+      border-radius: 1rem;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.7);
-      margin-bottom: 12px;
+      margin-bottom: 0.75rem;
     }
     .stat b{
       display:block;
-      font-size: 22px;
+      font-size: 1.375rem;
       letter-spacing: -0.02em;
-      margin-bottom: 4px;
+      margin-bottom: 0.25rem;
     }
     .stat span{
       color: var(--muted);
       font-weight: 600;
-      font-size: 13px;
+      font-size: 0.8125rem;
       line-height: 1.45;
     }
 
     .scroll-stage{ height: 100%; }
 
-    section{ padding: 54px 0; }
+    section{ padding: 3.375rem 0; }
 
     .section-head{
       display:flex;
       align-items:flex-end;
       justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 16px;
+      gap: 0.875rem;
+      margin-bottom: 1rem;
     }
 
     h2{
-      font-size: clamp(22px, 2.2vw, 30px);
+      font-size: clamp(1.375rem, 2.2vw, 1.875rem);
       letter-spacing: -0.03em;
     }
     .sub{
@@ -295,59 +304,59 @@
       font-weight: 600;
       max-width: 70ch;
       line-height: 1.55;
-      font-size: 14px;
+      font-size: 0.875rem;
     }
 
     .grid3{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      gap: 0.875rem;
     }
-    @media (max-width: 980px){
+    @media (max-width: 61.25rem){
       .grid3{ grid-template-columns: 1fr; }
     }
 
-    .feature{ padding: 18px; }
+    .feature{ padding: 1.125rem; }
     .feature h3{
-      font-size: 16px;
-      margin-bottom: 6px;
+      font-size: 1rem;
+      margin-bottom: 0.375rem;
       letter-spacing: -0.02em;
     }
     .feature p{
       color: var(--muted);
       line-height: 1.6;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 0.875rem;
     }
 
     .pricing{
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
+      gap: 0.875rem;
       align-items: stretch;
     }
-    @media (max-width: 980px){
+    @media (max-width: 61.25rem){
       .pricing{ grid-template-columns: 1fr; }
     }
 
     .plan{
-      padding: 18px;
+      padding: 1.125rem;
       display:flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 0.75rem;
     }
     .plan .tag{
       display:inline-block;
       font-weight: 800;
-      font-size: 12px;
-      padding: 6px 10px;
+      font-size: 0.75rem;
+      padding: 0.375rem 0.625rem;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.75);
       width: fit-content;
     }
     .price{
-      font-size: 34px;
+      font-size: 2.125rem;
       letter-spacing: -0.03em;
       font-weight: 900;
     }
@@ -355,52 +364,52 @@
       list-style: none;
       display:flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 6px;
+      gap: 0.5rem;
+      margin-top: 0.375rem;
       color: var(--muted);
       font-weight: 650;
       line-height: 1.35;
-      font-size: 14px;
+      font-size: 0.875rem;
     }
     .plan li{
       display:flex;
-      gap: 10px;
+      gap: 0.625rem;
       align-items: flex-start;
     }
     .check{
-      width: 18px; height: 18px;
-      border-radius: 6px;
+      width: 1.125rem; height: 1.125rem;
+      border-radius: 0.375rem;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.8);
       display:grid;
       place-items: center;
       flex: 0 0 auto;
-      margin-top: 1px;
+      margin-top: 0.0625rem;
       color: rgba(15,23,42,0.7);
       font-weight: 900;
-      font-size: 12px;
+      font-size: 0.75rem;
     }
 
     footer{
-      padding: 34px 0 50px;
+      padding: 2.125rem 0 3.125rem;
       border-top: 1px solid var(--border);
       background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(0.625rem);
     }
     .foot{
       display:flex;
       align-items:center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 0.625rem;
       flex-wrap: wrap;
       color: var(--muted);
       font-weight: 650;
-      font-size: 13px;
+      font-size: 0.8125rem;
     }
 
-    @media (max-width: 560px){
-      .links a{ padding: 8px 10px; }
-      .btn{ padding: 9px 12px; }
+    @media (max-width: 35rem){
+      .links a{ padding: 0.5rem 0.625rem; }
+      .btn{ padding: 0.5625rem 0.75rem; }
     }
   </style>
 </head>
@@ -433,7 +442,6 @@
             <div class="card hero-card">
               <div class="kicker"><span class="dot"></span> Software that scales with your team</div>
 
-              <!-- ✅ Updated h1 with gradient words -->
               <h1>
                 Ship <span class="gradient-word">faster</span>.
                 Stay <span class="gradient-word">safer</span>.
@@ -537,7 +545,7 @@
           <div class="pricing">
             <div class="card plan">
               <span class="tag">Basic</span>
-              <div class="price">$19<span style="font-size:14px;font-weight:800;color:var(--muted);">/mo</span></div>
+              <div class="price">$19<span style="font-size:0.875rem;font-weight:800;color:var(--muted);">/mo</span></div>
               <div class="sub">For solo builders and small prototypes.</div>
               <ul>
                 <li><span class="check">✓</span><span>1 workspace</span></li>
@@ -547,9 +555,9 @@
               <a class="btn btn-ghost" href="#top" style="margin-top:auto;">Start Basic Trial</a>
             </div>
 
-            <div class="card plan" style="transform: translateY(-2px); border-color: rgba(15,23,42,0.14);">
+            <div class="card plan" style="transform: translateY(-0.125rem); border-color: rgba(15,23,42,0.14);">
               <span class="tag">Team</span>
-              <div class="price">$79<span style="font-size:14px;font-weight:800;color:var(--muted);">/mo</span></div>
+              <div class="price">$79<span style="font-size:0.875rem;font-weight:800;color:var(--muted);">/mo</span></div>
               <div class="sub">For teams shipping production software.</div>
               <ul>
                 <li><span class="check">✓</span><span>Unlimited workspaces</span></li>
@@ -594,7 +602,6 @@
   <script type="module">
     import * as THREE from "three";
 
-    // ✅ Smooth auto-scroll for top nav + any anchor links
     const headerEl = document.querySelector("header");
     const headerOffset = () => (headerEl?.offsetHeight || 0) + 10;
 
@@ -614,22 +621,17 @@
       const hash = a.getAttribute("href");
       if (!hash || hash === "#") return;
 
-      // only intercept if the target exists on the page
       if (document.querySelector(hash)) {
         e.preventDefault();
         smoothScrollToHash(hash);
-
-        // keep URL hash in sync without jump
         history.pushState(null, "", hash);
       }
     });
 
-    // Handle back/forward hash changes smoothly too
     window.addEventListener("popstate", () => {
       smoothScrollToHash(location.hash);
     });
 
-    // If the page loads with a hash, scroll smoothly after layout
     if (location.hash) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => smoothScrollToHash(location.hash));

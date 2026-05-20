@@ -1,0 +1,2102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Services</title>
+  <link rel="icon" type="image/png" href="./assets/ACMEFavicon.png" />
+  <style>
+    @font-face {
+      font-family: "FuturaCyrillicBold";
+      src:
+        url("./ASSETS/FuturaCyrillicBold.ttf") format("truetype"),
+        url("../ASSETS/FuturaCyrillicBold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --services-bg: #ff8434;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--services-bg);
+    }
+
+    body {
+      position: relative;
+    }
+
+    .services-shell {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .services-lottie-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .services-lottie-stage {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: 0 0;
+      will-change: transform;
+      opacity: 0;
+    }
+
+    .services-lottie-layer.is-visible .services-lottie-stage {
+      opacity: 1;
+    }
+
+    .services-lottie-stage svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .services-video {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      object-fit: cover;
+      background: var(--services-bg);
+    }
+
+    .services-video-freeze {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .services-video-freeze.is-visible {
+      opacity: 1;
+    }
+
+    .services-hotspot-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: none;
+      cursor: default;
+    }
+
+    .services-hotspot-layer.is-active {
+      display: block;
+    }
+
+    .services-hotspot-layer.is-hit {
+      cursor: pointer;
+    }
+
+    .services-hotspot-image {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+      user-select: none;
+      transition: opacity 180ms ease;
+    }
+
+    .services-hotspot-layer.is-hit-lathe .services-hotspot-image--lathe,
+    .services-hotspot-layer.is-hit-mill .services-hotspot-image--mill,
+    .services-hotspot-layer.is-hit-proto .services-hotspot-image--proto,
+    .services-hotspot-layer.is-hit-screen .services-hotspot-image--screen {
+      opacity: 1;
+    }
+
+    .services-hint-box {
+      position: absolute;
+      left: 24px;
+      top: 24px;
+      z-index: 4;
+      width: 320px;
+      min-height: 56px;
+      padding: 14px 16px 14px 60px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.12);
+      color: #ffffff;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 12px;
+      line-height: 1.55;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 1;
+      transform: translateY(0);
+      transition:
+        opacity 180ms ease,
+        transform 220ms ease;
+    }
+
+    .services-hint-box[hidden] {
+      display: none;
+    }
+
+    .services-hint-box.is-dismissing {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    .services-hint-line + .services-hint-line {
+      margin-top: 10px;
+    }
+
+    .services-hint-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.12);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1;
+      letter-spacing: 0;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .services-fallback {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      background: rgba(255, 132, 52, 0.94);
+      color: #ffffff;
+      text-align: center;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(18px, 2vw, 28px);
+      line-height: 1.25;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .services-fallback.is-visible {
+      display: grid;
+    }
+
+    .services-controls {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition:
+        opacity 220ms ease,
+        transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .services-controls[hidden] {
+      display: none;
+    }
+
+    .services-controls.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .services-button {
+      min-height: 48px;
+      min-width: 140px;
+      padding: 2px 22px 0;
+      border: 1.5px solid rgba(255, 255, 255, 0.92);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1;
+      letter-spacing: 0.14em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition:
+        background-color 180ms ease,
+        transform 180ms ease,
+        opacity 180ms ease;
+    }
+
+    .services-button:hover:not(:disabled),
+    .services-button:focus-visible:not(:disabled) {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .services-button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .services-side-panel {
+      position: absolute;
+      left: clamp(22px, 3.2vw, 60px);
+      right: auto;
+      top: clamp(18px, 2.4vh, 28px);
+      bottom: clamp(18px, 2.4vh, 28px);
+      z-index: 4;
+      width: clamp(320px, 33vw, 520px);
+      max-width: calc(100vw - (clamp(22px, 3.2vw, 60px) * 2));
+      min-height: 0;
+      padding: clamp(24px, 3.2vh, 34px) clamp(28px, 3vw, 44px);
+      border: 1.5px solid rgba(255, 255, 255, 0.78);
+      border-radius: clamp(22px, 2vw, 30px);
+      background: rgba(7, 10, 15, 0.42);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(14px, 1.8vh, 20px);
+      align-content: flex-start;
+      overflow: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .services-side-panel[hidden] {
+      display: none;
+    }
+
+    .services-side-panel > * {
+      opacity: 0;
+      transform: translateX(-18px);
+      transition:
+        opacity 240ms ease,
+        transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .services-side-panel > *:nth-child(1) {
+      transition-delay: 0ms;
+    }
+
+    .services-side-panel > *:nth-child(2) {
+      transition-delay: 70ms;
+    }
+
+    .services-side-panel > *:nth-child(3) {
+      transition-delay: 140ms;
+    }
+
+    .services-side-panel > *:nth-child(4) {
+      transition-delay: 210ms;
+    }
+
+    .services-side-panel.is-visible > * {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .services-side-panel-standard {
+      width: 100%;
+      min-height: 100%;
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .services-side-panel-title {
+      margin: 0;
+      width: 100%;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(24px, 2.4vw, 34px);
+      letter-spacing: 0.06em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .services-side-panel-copy {
+      margin: 0;
+      width: 100%;
+      color: rgba(255, 255, 255, 0.82);
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(12px, 0.82vw, 13px);
+      line-height: 1.65;
+      letter-spacing: 0.06em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .services-side-panel.is-lathe .services-side-panel-copy {
+      font-size: clamp(13px, 0.96vw, 15px);
+      line-height: 1.78;
+    }
+
+    .services-side-panel-gallery-intro[hidden] {
+      display: none;
+    }
+
+    .services-side-panel-gallery-intro {
+      margin: 0;
+      width: 100%;
+      color: rgba(255, 255, 255, 0.76);
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 11px;
+      line-height: 1.55;
+      letter-spacing: 0.13em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .services-side-panel-action-copy {
+      width: 100%;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.72);
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 11px;
+      line-height: 1.6;
+      letter-spacing: 0.11em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .services-side-panel-image {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1.24 / 1;
+      min-height: 180px;
+      max-height: min(34vh, 320px);
+      border: 1.5px solid rgba(255, 255, 255, 0.58);
+      border-radius: clamp(18px, 1.8vw, 24px);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+        rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .services-side-panel-image.is-gallery::before,
+    .services-side-panel-image.is-gallery::after {
+      display: none;
+    }
+
+    .services-side-panel-image::before,
+    .services-side-panel-image::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .services-side-panel-image::before {
+      background:
+        linear-gradient(135deg, transparent 49.4%, rgba(255, 255, 255, 0.26) 49.5%, rgba(255, 255, 255, 0.26) 50.5%, transparent 50.6%);
+    }
+
+    .services-side-panel-image::after {
+      background:
+        linear-gradient(45deg, transparent 49.4%, rgba(255, 255, 255, 0.2) 49.5%, rgba(255, 255, 255, 0.2) 50.5%, transparent 50.6%);
+    }
+
+    .services-side-panel-image-label {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(255, 255, 255, 0.78);
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .services-side-panel-gallery[hidden] {
+      display: none;
+    }
+
+    .services-side-panel-gallery {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .services-side-panel-gallery-viewport {
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .services-side-panel-gallery-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .services-side-panel-gallery-track {
+      height: 100%;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 100%;
+    }
+
+    .services-side-panel-gallery-slide {
+      margin: 0;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .services-side-panel-gallery-slide img {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: auto !important;
+      height: auto !important;
+      max-width: calc(100% - 24px);
+      max-height: calc(100% - 24px);
+      margin: auto;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .services-side-panel-gallery-button {
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.48);
+      border-radius: 999px;
+      background: rgba(8, 14, 20, 0.54);
+      color: #fff9f0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+    }
+
+    .services-side-panel-gallery-button:hover,
+    .services-side-panel-gallery-button:focus-visible {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.76);
+      transform: translateY(-50%) scale(1.04);
+      outline: none;
+    }
+
+    .services-side-panel-gallery-button--prev {
+      left: 12px;
+    }
+
+    .services-side-panel-gallery-button--next {
+      right: 12px;
+    }
+
+    .services-side-panel-action {
+      width: 100%;
+      align-self: center;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    .services-side-panel.is-on-right {
+      left: auto;
+      right: clamp(22px, 3.2vw, 60px);
+    }
+
+    .services-side-panel.is-proto {
+      width: clamp(540px, 48vw, 760px);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .services-side-panel.is-proto::-webkit-scrollbar {
+      display: none;
+    }
+
+    .services-side-panel-standard[hidden],
+    .services-side-panel-proto[hidden] {
+      display: none;
+    }
+
+    .services-side-panel-proto {
+      width: 100%;
+      min-height: 100%;
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .services-side-panel-proto-title {
+      margin: 0;
+      width: 100%;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(30px, 3vw, 44px);
+      letter-spacing: 0.08em;
+      text-align: center;
+      text-transform: uppercase;
+      color: #fff9f0;
+    }
+
+    .services-side-panel-proto-split {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        "left-title right-title"
+        "left-copy right-copy"
+        "left-gallery right-gallery"
+        "left-action right-action";
+      grid-template-rows: auto auto minmax(180px, 1fr) auto;
+      column-gap: 36px;
+      row-gap: 16px;
+      align-items: stretch;
+      position: relative;
+      padding: 8px 0;
+    }
+
+    .services-side-panel-proto-split::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      bottom: 8px;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.34);
+      pointer-events: none;
+    }
+
+    .services-side-panel-proto-subtitle--left {
+      grid-area: left-title;
+      padding-right: 18px;
+    }
+
+    .services-side-panel-proto-subtitle--right {
+      grid-area: right-title;
+      padding-left: 18px;
+    }
+
+    .services-side-panel-proto-copy--left {
+      grid-area: left-copy;
+      padding-right: 18px;
+    }
+
+    .services-side-panel-proto-copy--right {
+      grid-area: right-copy;
+      padding-left: 18px;
+    }
+
+    .services-side-panel-proto-subtitle {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(18px, 1.5vw, 24px);
+      letter-spacing: 0.08em;
+      text-align: center;
+      text-transform: uppercase;
+      color: #fff9f0;
+    }
+
+    .services-side-panel-proto-copy {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(12px, 0.82vw, 13px);
+      line-height: 1.65;
+      letter-spacing: 0.06em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .services-side-panel-proto-gallery {
+      position: relative;
+      align-self: stretch;
+      width: 100%;
+      height: 100%;
+      min-height: 180px;
+      border: 1.5px solid rgba(255, 255, 255, 0.58);
+      border-radius: clamp(18px, 1.8vw, 24px);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+        rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .services-side-panel-proto-gallery.services-side-panel-proto-copy--left {
+      grid-area: left-gallery;
+    }
+
+    .services-side-panel-proto-gallery.services-side-panel-proto-copy--right {
+      grid-area: right-gallery;
+    }
+
+    .services-side-panel-proto-action {
+      width: 100%;
+      max-width: 220px;
+      align-self: end;
+      margin-top: 0;
+    }
+
+    .services-side-panel-proto-action-wrap {
+      width: min(100%, 260px);
+      margin-inline: auto;
+      align-self: end;
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .services-side-panel-proto-action-wrap--left {
+      grid-area: left-action;
+    }
+
+    .services-side-panel-proto-action-wrap--right {
+      grid-area: right-action;
+    }
+
+    .services-side-panel-proto-action-copy {
+      width: auto;
+      max-width: 100%;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.72);
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 11px;
+      line-height: 1.6;
+      letter-spacing: 0.11em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .services-side-panel-proto-gallery-viewport {
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .services-side-panel-proto-gallery-viewport::-webkit-scrollbar {
+      display: none;
+    }
+
+    .services-side-panel-proto-gallery-track {
+      height: 100%;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 100%;
+    }
+
+    .services-side-panel-proto-gallery-slide {
+      margin: 0;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .services-side-panel-proto-gallery-slide img {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: auto !important;
+      height: auto !important;
+      max-width: calc(100% - 24px);
+      max-height: calc(100% - 24px);
+      margin: auto;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    @media (max-aspect-ratio: 4 / 3) {
+      .services-side-panel {
+        width: clamp(300px, 38vw, 460px);
+        padding: 24px 30px;
+      }
+
+      .services-side-panel.is-proto {
+        width: clamp(460px, 56vw, 680px);
+      }
+
+      .services-side-panel-image {
+        max-height: min(28vh, 250px);
+      }
+    }
+
+    @media (max-height: 760px) {
+      .services-side-panel {
+        top: 16px;
+        bottom: 16px;
+        padding: 20px 24px;
+        gap: 12px;
+      }
+
+      .services-side-panel-title {
+        font-size: clamp(22px, 2vw, 28px);
+      }
+
+      .services-side-panel-copy {
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .services-side-panel-image {
+        min-height: 150px;
+        max-height: min(24vh, 210px);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .services-side-panel {
+        left: 20px;
+        right: 20px;
+        top: auto;
+        bottom: 96px;
+        width: auto;
+        max-width: none;
+        max-height: min(68vh, 560px);
+        padding: 22px 18px 22px 22px;
+        transform: none;
+      }
+
+      .services-side-panel.is-proto {
+        width: auto;
+      }
+
+      .services-side-panel-proto-split {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "left-title"
+          "left-copy"
+          "left-gallery"
+          "left-action"
+          "right-title"
+          "right-copy"
+          "right-gallery"
+          "right-action";
+        row-gap: 10px;
+      }
+
+      .services-side-panel-proto-split::before {
+        display: none;
+      }
+
+      .services-side-panel-proto-subtitle--left,
+      .services-side-panel-proto-copy--left,
+      .services-side-panel-proto-subtitle--right,
+      .services-side-panel-proto-copy--right {
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .services-side-panel-image {
+        min-height: 140px;
+        max-height: 220px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="neutral-theme-overrides.css" />
+</head>
+<body data-services-part="1">
+  <main class="services-shell" id="services-shell" aria-label="Services video stage">
+    <div class="services-lottie-layer" id="services-lottie-layer" aria-hidden="true">
+      <div class="services-lottie-stage" id="services-lottie-stage"></div>
+    </div>
+
+    <video
+      class="services-video"
+      id="services-video"
+      src="./assets/videos/services_menu.mp4"
+      muted
+      playsinline
+      preload="auto"
+      aria-label="Services menu video"
+    ></video>
+    <canvas class="services-video-freeze" id="services-video-freeze" aria-hidden="true"></canvas>
+    <div class="services-hotspot-layer" id="services-hotspot-layer" aria-hidden="true">
+      <img class="services-hotspot-image services-hotspot-image--lathe" id="services-hotspot-image-lathe" src="./assets/highlightedLathe.png" alt="" />
+      <img class="services-hotspot-image services-hotspot-image--mill" id="services-hotspot-image-mill" src="./assets/highlightedMill.png" alt="" />
+      <img class="services-hotspot-image services-hotspot-image--proto" id="services-hotspot-image-proto" src="./assets/highlightedProto.png" alt="" />
+      <img class="services-hotspot-image services-hotspot-image--screen" id="services-hotspot-image-screen" src="./assets/highlightedScreen.png" alt="" />
+    </div>
+
+    <div class="services-hint-box" id="services-hint-box" hidden>
+      <div class="services-hint-icon" aria-hidden="true">?</div>
+      <p class="services-hint-line">Click the machines to learn more about them.</p>
+      <p class="services-hint-line">Click the screen to go back to the main menu.</p>
+    </div>
+    <div class="services-controls" id="services-controls" hidden>
+      <button class="services-button" id="services-back" type="button" hidden>Back</button>
+    </div>
+
+    <aside class="services-side-panel" id="services-side-panel" hidden aria-label="Lathe information">
+      <div class="services-side-panel-standard" id="services-side-panel-standard">
+        <h2 class="services-side-panel-title" id="services-side-panel-title">CNC LATHE</h2>
+        <p class="services-side-panel-copy" id="services-side-panel-copy">
+          A CNC lathe spins a workpiece while a stationary cutting tool shapes it. It produces highly accurate cylindrical parts like shafts, threads and fittings with excellent repeatability and surface finish.
+        </p>
+        <p class="services-side-panel-gallery-intro" id="services-side-panel-gallery-intro" hidden>
+          Examples of parts that can be created with this technology:
+        </p>
+        <div class="services-side-panel-image" id="services-side-panel-image">
+          <div class="services-side-panel-gallery" id="services-side-panel-gallery" hidden>
+            <button class="services-side-panel-gallery-button services-side-panel-gallery-button--prev" id="services-side-panel-gallery-prev" type="button" aria-label="Show previous lathe image">&#8249;</button>
+            <div class="services-side-panel-gallery-viewport" id="services-side-panel-gallery-viewport">
+              <div class="services-side-panel-gallery-track" id="services-side-panel-gallery-track"></div>
+            </div>
+            <button class="services-side-panel-gallery-button services-side-panel-gallery-button--next" id="services-side-panel-gallery-next" type="button" aria-label="Show next lathe image">&#8250;</button>
+          </div>
+          <span class="services-side-panel-image-label" id="services-side-panel-image-label">Placeholder image</span>
+        </div>
+        <p class="services-side-panel-action-copy">
+          Interested in learning more? Hit the button down below to get a more in-depth description of this technology.
+        </p>
+        <a class="services-button services-side-panel-action" id="services-side-panel-action" href="./services-detailed.html#services-detailed-lathe">Learn more</a>
+      </div>
+
+      <div class="services-side-panel-proto" id="services-side-panel-proto" hidden>
+        <h2 class="services-side-panel-proto-title">Prototyping</h2>
+        <div class="services-side-panel-proto-split">
+          <h3 class="services-side-panel-proto-subtitle services-side-panel-proto-subtitle--left" id="services-proto-injection-title">Injection Molding</h3>
+          <h3 class="services-side-panel-proto-subtitle services-side-panel-proto-subtitle--right" id="services-proto-printing-title">3D Printing</h3>
+          <p class="services-side-panel-proto-copy services-side-panel-proto-copy--left" aria-labelledby="services-proto-injection-title">
+            Bridge production-ready concepts into repeatable molded parts with early tooling discussions,
+            form refinement, and validation steps that prepare a design for scalable manufacturing.
+          </p>
+          <div class="services-side-panel-proto-gallery services-side-panel-proto-copy--left">
+            <button class="services-side-panel-gallery-button services-side-panel-gallery-button--prev" id="services-proto-gallery-injection-prev" type="button" aria-label="Show previous injection molding image">&#8249;</button>
+            <div class="services-side-panel-proto-gallery-viewport" id="services-proto-gallery-injection-viewport">
+              <div class="services-side-panel-proto-gallery-track" id="services-proto-gallery-injection-track"></div>
+            </div>
+            <button class="services-side-panel-gallery-button services-side-panel-gallery-button--next" id="services-proto-gallery-injection-next" type="button" aria-label="Show next injection molding image">&#8250;</button>
+          </div>
+          <div class="services-side-panel-proto-action-wrap services-side-panel-proto-action-wrap--left">
+            <p class="services-side-panel-proto-action-copy">
+              Interested in learning more? Hit the button down below to get a more in-depth description of this technology.
+            </p>
+            <a class="services-button services-side-panel-proto-action" href="./services-detailed.html#services-detailed-injection-molding">Learn more</a>
+          </div>
+          <p class="services-side-panel-proto-copy services-side-panel-proto-copy--right" aria-labelledby="services-proto-printing-title">
+            Move quickly through fit checks, concept reviews, and functional iterations with additive
+            prototypes that help validate geometry before committing to a more permanent process.
+          </p>
+          <div class="services-side-panel-proto-gallery services-side-panel-proto-copy--right">
+            <button class="services-side-panel-gallery-button services-side-panel-gallery-button--prev" id="services-proto-gallery-printing-prev" type="button" aria-label="Show previous 3D printing image">&#8249;</button>
+            <div class="services-side-panel-proto-gallery-viewport" id="services-proto-gallery-printing-viewport">
+              <div class="services-side-panel-proto-gallery-track" id="services-proto-gallery-printing-track"></div>
+            </div>
+            <button class="services-side-panel-gallery-button services-side-panel-gallery-button--next" id="services-proto-gallery-printing-next" type="button" aria-label="Show next 3D printing image">&#8250;</button>
+          </div>
+          <div class="services-side-panel-proto-action-wrap services-side-panel-proto-action-wrap--right">
+            <p class="services-side-panel-proto-action-copy">
+              Interested in learning more? Hit the button down below to get a more in-depth description of this technology.
+            </p>
+            <a class="services-button services-side-panel-proto-action services-side-panel-proto-action--right" href="./services-detailed.html#services-detailed-3d-printing">Learn more</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="services-fallback" id="services-fallback" role="status" aria-live="polite">
+      Services video could not be played.
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.13.0/lottie.min.js"></script>
+  <script>
+    const VIDEO_FRAME_RATE = 60;
+    const MENU_VIDEO_URL = "./assets/videos/services_menu.mp4";
+    const LATHE_VIDEO_URL = "./assets/videos/services_lathe.mp4";
+    const MILL_VIDEO_URL = "./assets/videos/services_mill.mp4";
+    const PROTO_VIDEO_URL = "./assets/videos/services_proto.mp4";
+    const FIRST_PART_END_FRAME = 80;
+    const MACHINE_PART_END_FRAME = 80;
+    const MACHINE_RETURN_FRAME_COUNT = 80;
+    const FRAME_TOLERANCE_SECONDS = 0.5 / VIDEO_FRAME_RATE;
+    const HOTSPOT_ALPHA_THRESHOLD = 16;
+    const LOTTIE_PATH = "./assets/introLottie.json";
+    const HIGHLIGHTED_LATHE_IMAGE_URL = "./assets/highlightedLathe.png";
+    const HIGHLIGHTED_MILL_IMAGE_URL = "./assets/highlightedMill.png";
+    const HIGHLIGHTED_PROTO_IMAGE_URL = "./assets/highlightedProto.png";
+    const HIGHLIGHTED_SCREEN_IMAGE_URL = "./assets/highlightedScreen.png";
+    const VIDEO_RENDER_SIZE = { width: 1920, height: 1080 };
+    const MACHINE_GALLERY_IMAGES = Object.freeze({
+      lathe: [
+        "./assets/images/parts/lathe/lathepart1.png",
+        "./assets/images/parts/lathe/lathepart2.png",
+        "./assets/images/parts/lathe/lathepart3.png",
+        "./assets/images/parts/lathe/lathepart4.png",
+      ],
+      mill: [
+        "./assets/images/parts/mill/millpart1.png",
+        "./assets/images/parts/mill/millpart2.png",
+        "./assets/images/parts/mill/millpart3.png",
+        "./assets/images/parts/mill/millpart4.png",
+        "./assets/images/parts/mill/millpart5.png",
+        "./assets/images/parts/mill/millpart6.png",
+      ],
+    });
+    const PROTO_GALLERY_IMAGES = Object.freeze({
+      injection: [
+        "./assets/images/parts/proto/injection/injectionpart1.png",
+        "./assets/images/parts/proto/injection/injectionpart2.png",
+      ],
+      printing: [
+        "./assets/images/parts/proto/3d-print/protopart1.png",
+        "./assets/images/parts/proto/3d-print/protopart2.png",
+      ],
+    });
+    const LOTTIE_TARGET_POINTS = {
+      topLeft: { x: 0.381941, y: 0.124681 },
+      topRight: { x: 0.620647, y: 0.124403 },
+      bottomRight: { x: 0.612428, y: 0.350801 },
+      bottomLeft: { x: 0.390005, y: 0.351640 },
+    };
+    const PlaybackPart = Object.freeze({
+      INTRO: 1,
+      PAUSED_STAGE: 2,
+      LATHE_PAUSED: 3,
+      MILL_PAUSED: 4,
+      PROTO_PAUSED: 5,
+    });
+
+    const MACHINE_CONFIGS = Object.freeze({
+      lathe: {
+        key: "lathe",
+        pausedPart: PlaybackPart.LATHE_PAUSED,
+        videoUrl: LATHE_VIDEO_URL,
+        highlightImageUrl: HIGHLIGHTED_LATHE_IMAGE_URL,
+        title: "CNC LATHE",
+        copy: "A CNC lathe spins a workpiece while a stationary cutting tool shapes it. It produces highly accurate cylindrical parts like shafts, threads and fittings with excellent repeatability and surface finish.",
+        detailsHref: "./services-detailed.html#services-detailed-lathe",
+      },
+      mill: {
+        key: "mill",
+        pausedPart: PlaybackPart.MILL_PAUSED,
+        videoUrl: MILL_VIDEO_URL,
+        highlightImageUrl: HIGHLIGHTED_MILL_IMAGE_URL,
+        title: "CNC MILL",
+        copy: "A CNC mill removes material with a rotating cutting tool to create pockets, faces, holes and complex geometry. It is a strong fit for precise prismatic parts, fixtures and detailed machined features.",
+        detailsHref: "./services-detailed.html#services-detailed-mill",
+      },
+      proto: {
+        key: "proto",
+        pausedPart: PlaybackPart.PROTO_PAUSED,
+        videoUrl: PROTO_VIDEO_URL,
+        highlightImageUrl: HIGHLIGHTED_PROTO_IMAGE_URL,
+        title: "PROTO",
+        copy: "Prototype-focused work for early validation, concept refinement and quick iterations before a production path is locked in. This branch is ready for the upcoming services_proto.mp4 asset.",
+        detailsHref: "./services-detailed.html",
+      },
+    });
+
+    const HOTSPOT_CONFIGS = Object.freeze({
+      lathe: {
+        key: "lathe",
+        highlightImageUrl: HIGHLIGHTED_LATHE_IMAGE_URL,
+        action: "machine",
+      },
+      mill: {
+        key: "mill",
+        highlightImageUrl: HIGHLIGHTED_MILL_IMAGE_URL,
+        action: "machine",
+      },
+      proto: {
+        key: "proto",
+        highlightImageUrl: HIGHLIGHTED_PROTO_IMAGE_URL,
+        action: "machine",
+      },
+      screen: {
+        key: "screen",
+        highlightImageUrl: HIGHLIGHTED_SCREEN_IMAGE_URL,
+        action: "navigate",
+        href: "./main.html",
+      },
+    });
+
+    const body = document.body;
+    const shell = document.getElementById("services-shell");
+    const lottieLayer = document.getElementById("services-lottie-layer");
+    const lottieStage = document.getElementById("services-lottie-stage");
+    const video = document.getElementById("services-video");
+    const videoFreeze = document.getElementById("services-video-freeze");
+    const hotspotLayer = document.getElementById("services-hotspot-layer");
+    const hotspotImageLathe = document.getElementById("services-hotspot-image-lathe");
+    const hotspotImageMill = document.getElementById("services-hotspot-image-mill");
+    const hotspotImageProto = document.getElementById("services-hotspot-image-proto");
+    const hotspotImageScreen = document.getElementById("services-hotspot-image-screen");
+    const hintBox = document.getElementById("services-hint-box");
+    const controls = document.getElementById("services-controls");
+    const backButton = document.getElementById("services-back");
+    const sidePanel = document.getElementById("services-side-panel");
+    const sidePanelStandard = document.getElementById("services-side-panel-standard");
+    const sidePanelProto = document.getElementById("services-side-panel-proto");
+    const sidePanelGalleryIntro = document.getElementById("services-side-panel-gallery-intro");
+    const sidePanelImage = document.getElementById("services-side-panel-image");
+    const sidePanelImageLabel = document.getElementById("services-side-panel-image-label");
+    const sidePanelGallery = document.getElementById("services-side-panel-gallery");
+    const sidePanelGalleryViewport = document.getElementById("services-side-panel-gallery-viewport");
+    const sidePanelGalleryTrack = document.getElementById("services-side-panel-gallery-track");
+    const sidePanelGalleryPrev = document.getElementById("services-side-panel-gallery-prev");
+    const sidePanelGalleryNext = document.getElementById("services-side-panel-gallery-next");
+    const protoGalleryInjectionViewport = document.getElementById("services-proto-gallery-injection-viewport");
+    const protoGalleryInjectionTrack = document.getElementById("services-proto-gallery-injection-track");
+    const protoGalleryInjectionPrev = document.getElementById("services-proto-gallery-injection-prev");
+    const protoGalleryInjectionNext = document.getElementById("services-proto-gallery-injection-next");
+    const protoGalleryPrintingViewport = document.getElementById("services-proto-gallery-printing-viewport");
+    const protoGalleryPrintingTrack = document.getElementById("services-proto-gallery-printing-track");
+    const protoGalleryPrintingPrev = document.getElementById("services-proto-gallery-printing-prev");
+    const protoGalleryPrintingNext = document.getElementById("services-proto-gallery-printing-next");
+    const sidePanelTitle = document.getElementById("services-side-panel-title");
+    const sidePanelCopy = document.getElementById("services-side-panel-copy");
+    const sidePanelAction = document.getElementById("services-side-panel-action");
+    const fallback = document.getElementById("services-fallback");
+    const firstPartEndTime = FIRST_PART_END_FRAME / VIDEO_FRAME_RATE;
+    const machinePartEndTime = MACHINE_PART_END_FRAME / VIDEO_FRAME_RATE;
+    let currentPart = PlaybackPart.INTRO;
+    let boundaryFrameCallbackId = null;
+    let boundaryFallbackRafId = null;
+    let overlayLottieData = null;
+    let overlayLottieAnimation = null;
+    let lottieLayoutFrameId = null;
+    let hotspotLayoutFrameId = null;
+    let isLottieDomReady = false;
+    let shouldShowLottie = false;
+    let currentVideoUrl = MENU_VIDEO_URL;
+    let isBusy = false;
+    let hotspotAssets = {};
+    let activeHotspotMachineKey = null;
+    let activeMachineKey = null;
+    let isHintDismissed = false;
+    let isMachineUiSuppressed = false;
+
+    if (!body || !shell || !lottieLayer || !lottieStage || !video || !videoFreeze || !hotspotLayer || !hotspotImageLathe || !hotspotImageMill || !hotspotImageProto || !hotspotImageScreen || !hintBox || !controls || !backButton || !sidePanel || !sidePanelStandard || !sidePanelProto || !sidePanelGalleryIntro || !sidePanelImage || !sidePanelImageLabel || !sidePanelGallery || !sidePanelGalleryViewport || !sidePanelGalleryTrack || !sidePanelGalleryPrev || !sidePanelGalleryNext || !protoGalleryInjectionViewport || !protoGalleryInjectionTrack || !protoGalleryInjectionPrev || !protoGalleryInjectionNext || !protoGalleryPrintingViewport || !protoGalleryPrintingTrack || !protoGalleryPrintingPrev || !protoGalleryPrintingNext || !sidePanelTitle || !sidePanelCopy || !sidePanelAction || !fallback) {
+      throw new Error("Services page media elements were not found.");
+    }
+
+    const protoGalleryElements = Object.freeze({
+      injection: {
+        viewport: protoGalleryInjectionViewport,
+        track: protoGalleryInjectionTrack,
+        prev: protoGalleryInjectionPrev,
+        next: protoGalleryInjectionNext,
+        label: "injection molding",
+      },
+      printing: {
+        viewport: protoGalleryPrintingViewport,
+        track: protoGalleryPrintingTrack,
+        prev: protoGalleryPrintingPrev,
+        next: protoGalleryPrintingNext,
+        label: "3D printing",
+      },
+    });
+
+    function setPart(part) {
+      currentPart = part;
+      body.dataset.servicesPart = String(part);
+      isMachineUiSuppressed = false;
+      isHintDismissed = part === PlaybackPart.PAUSED_STAGE ? false : true;
+      syncControls();
+    }
+
+    function showUiElement(element) {
+      if (!element.hidden) {
+        element.classList.add("is-visible");
+        return;
+      }
+
+      element.classList.remove("is-visible");
+      element.hidden = false;
+      void element.offsetWidth;
+      requestAnimationFrame(() => {
+        element.classList.add("is-visible");
+      });
+    }
+
+    function hideUiElement(element) {
+      element.classList.remove("is-visible");
+      element.hidden = true;
+    }
+
+    function dismissHintBox() {
+      if (hintBox.hidden || hintBox.classList.contains("is-dismissing")) {
+        return;
+      }
+
+      hintBox.classList.add("is-dismissing");
+      window.setTimeout(() => {
+        hintBox.classList.remove("is-dismissing");
+        hintBox.hidden = true;
+      }, 220);
+    }
+
+    function clearBoundaryWatcher() {
+      if (boundaryFrameCallbackId !== null && "cancelVideoFrameCallback" in HTMLVideoElement.prototype) {
+        video.cancelVideoFrameCallback(boundaryFrameCallbackId);
+        boundaryFrameCallbackId = null;
+      }
+
+      if (boundaryFallbackRafId !== null) {
+        cancelAnimationFrame(boundaryFallbackRafId);
+        boundaryFallbackRafId = null;
+      }
+    }
+
+    function showFallback() {
+      fallback.classList.add("is-visible");
+    }
+
+    function hideFallback() {
+      fallback.classList.remove("is-visible");
+    }
+
+    function setActiveHotspotMachine(machineKey) {
+      activeHotspotMachineKey = machineKey;
+      hotspotLayer.classList.toggle("is-hit", Boolean(machineKey));
+      hotspotLayer.classList.toggle("is-hit-lathe", machineKey === "lathe");
+      hotspotLayer.classList.toggle("is-hit-mill", machineKey === "mill");
+      hotspotLayer.classList.toggle("is-hit-proto", machineKey === "proto");
+      hotspotLayer.classList.toggle("is-hit-screen", machineKey === "screen");
+    }
+
+    function disableMachineHotspots() {
+      hotspotLayer.classList.remove("is-active");
+      setActiveHotspotMachine(null);
+    }
+
+    function enableMachineHotspots() {
+      hotspotLayer.classList.add("is-active");
+    }
+
+    async function loadHotspotAsset(hotspotConfig) {
+      const imageElement = new Image();
+      imageElement.decoding = "async";
+
+      await new Promise((resolve, reject) => {
+        imageElement.addEventListener("load", resolve, { once: true });
+        imageElement.addEventListener("error", reject, { once: true });
+        imageElement.src = hotspotConfig.highlightImageUrl;
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = imageElement.naturalWidth;
+      canvas.height = imageElement.naturalHeight;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+
+      if (!context) {
+        throw new Error(`The ${hotspotConfig.key} hotspot image canvas could not be created.`);
+      }
+
+      context.drawImage(imageElement, 0, 0);
+
+      hotspotAssets[hotspotConfig.key] = {
+        imageElement,
+        context,
+      };
+    }
+
+    async function initialiseMachineHotspots() {
+      await Promise.all(Object.values(HOTSPOT_CONFIGS).map((hotspotConfig) => loadHotspotAsset(hotspotConfig)));
+      requestHotspotLayout();
+    }
+
+    function getMachineHotspotLocalPoint(machineKey, clientX, clientY) {
+      const hotspotAsset = hotspotAssets[machineKey];
+
+      if (!hotspotAsset || hotspotAsset.imageElement.naturalWidth <= 0 || hotspotAsset.imageElement.naturalHeight <= 0) {
+        return null;
+      }
+
+      const rect =
+        machineKey === "lathe"
+          ? hotspotImageLathe.getBoundingClientRect()
+          : machineKey === "mill"
+            ? hotspotImageMill.getBoundingClientRect()
+            : machineKey === "proto"
+              ? hotspotImageProto.getBoundingClientRect()
+              : hotspotImageScreen.getBoundingClientRect();
+
+      if (rect.width <= 0 || rect.height <= 0) {
+        return null;
+      }
+
+      const imageWidth = hotspotAsset.imageElement.naturalWidth;
+      const imageHeight = hotspotAsset.imageElement.naturalHeight;
+      const localX = clientX - rect.left;
+      const localY = clientY - rect.top;
+
+      if (localX < 0 || localY < 0 || localX > rect.width || localY > rect.height) {
+        return null;
+      }
+
+      const imageX = Math.floor((localX / rect.width) * imageWidth);
+      const imageY = Math.floor((localY / rect.height) * imageHeight);
+
+      return {
+        x: Math.max(0, Math.min(imageWidth - 1, imageX)),
+        y: Math.max(0, Math.min(imageHeight - 1, imageY)),
+      };
+    }
+
+    function isMachineHotspotOpaqueAt(machineKey, clientX, clientY) {
+      const hotspotAsset = hotspotAssets[machineKey];
+
+      if (!hotspotAsset) {
+        return false;
+      }
+
+      const localPoint = getMachineHotspotLocalPoint(machineKey, clientX, clientY);
+
+      if (!localPoint) {
+        return false;
+      }
+
+      const pixel = hotspotAsset.context.getImageData(localPoint.x, localPoint.y, 1, 1).data;
+      return pixel[3] >= HOTSPOT_ALPHA_THRESHOLD;
+    }
+
+    function updateMachineHotspotHit(clientX, clientY) {
+      if (currentPart !== PlaybackPart.PAUSED_STAGE || isBusy || !hotspotLayer.classList.contains("is-active")) {
+        setActiveHotspotMachine(null);
+        return;
+      }
+
+      const hoveredMachineKey = ["proto", "mill", "lathe", "screen"].find((machineKey) => isMachineHotspotOpaqueAt(machineKey, clientX, clientY)) ?? null;
+      setActiveHotspotMachine(hoveredMachineKey);
+    }
+
+    function showVideoFreezeFrame() {
+      if (video.videoWidth <= 0 || video.videoHeight <= 0) {
+        return false;
+      }
+
+      const context = videoFreeze.getContext("2d");
+
+      if (!context) {
+        return false;
+      }
+
+      const shellRect = shell.getBoundingClientRect();
+      const pixelRatio = window.devicePixelRatio || 1;
+      const canvasWidth = Math.max(1, Math.round(shellRect.width * pixelRatio));
+      const canvasHeight = Math.max(1, Math.round(shellRect.height * pixelRatio));
+
+      if (videoFreeze.width !== canvasWidth || videoFreeze.height !== canvasHeight) {
+        videoFreeze.width = canvasWidth;
+        videoFreeze.height = canvasHeight;
+      }
+
+      context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      const scale = Math.max(canvasWidth / video.videoWidth, canvasHeight / video.videoHeight);
+      const drawWidth = video.videoWidth * scale;
+      const drawHeight = video.videoHeight * scale;
+      const drawX = (canvasWidth - drawWidth) / 2;
+      const drawY = (canvasHeight - drawHeight) / 2;
+
+      context.drawImage(video, drawX, drawY, drawWidth, drawHeight);
+      videoFreeze.classList.add("is-visible");
+      return true;
+    }
+
+    function hideVideoFreezeFrame() {
+      videoFreeze.classList.remove("is-visible");
+    }
+
+    function stopLottieOverlay() {
+      shouldShowLottie = false;
+      lottieLayer.classList.remove("is-visible");
+      if (overlayLottieAnimation) {
+        overlayLottieAnimation.stop();
+      }
+    }
+
+    function getVideoSourceSize() {
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        return {
+          width: video.videoWidth,
+          height: video.videoHeight,
+        };
+      }
+
+      return VIDEO_RENDER_SIZE;
+    }
+
+    function getRenderedVideoBox() {
+      const shellRect = shell.getBoundingClientRect();
+      const videoRect = video.getBoundingClientRect();
+      const { width: sourceWidth, height: sourceHeight } = getVideoSourceSize();
+      const scale = Math.max(videoRect.width / sourceWidth, videoRect.height / sourceHeight);
+      const renderedWidth = sourceWidth * scale;
+      const renderedHeight = sourceHeight * scale;
+
+      return {
+        left: videoRect.left - shellRect.left + (videoRect.width - renderedWidth) / 2,
+        top: videoRect.top - shellRect.top + (videoRect.height - renderedHeight) / 2,
+        width: renderedWidth,
+        height: renderedHeight,
+      };
+    }
+
+    function layoutLatheHotspot() {
+      const box = getRenderedVideoBox();
+      [hotspotImageLathe, hotspotImageMill, hotspotImageProto, hotspotImageScreen].forEach((hotspotImage) => {
+        hotspotImage.style.left = `${box.left}px`;
+        hotspotImage.style.top = `${box.top}px`;
+        hotspotImage.style.width = `${box.width}px`;
+        hotspotImage.style.height = `${box.height}px`;
+      });
+    }
+
+    function requestHotspotLayout() {
+      if (hotspotLayoutFrameId !== null) {
+        cancelAnimationFrame(hotspotLayoutFrameId);
+      }
+
+      hotspotLayoutFrameId = requestAnimationFrame(() => {
+        hotspotLayoutFrameId = null;
+        layoutLatheHotspot();
+      });
+    }
+
+    function mapNormalizedPointToScreen(point, box) {
+      return {
+        x: box.left + point.x * box.width,
+        y: box.top + point.y * box.height,
+      };
+    }
+
+    function solveLinearSystem(matrix) {
+      const rowCount = matrix.length;
+      const columnCount = matrix[0].length;
+
+      for (let pivotIndex = 0; pivotIndex < rowCount; pivotIndex += 1) {
+        let maxRowIndex = pivotIndex;
+
+        for (let rowIndex = pivotIndex + 1; rowIndex < rowCount; rowIndex += 1) {
+          if (Math.abs(matrix[rowIndex][pivotIndex]) > Math.abs(matrix[maxRowIndex][pivotIndex])) {
+            maxRowIndex = rowIndex;
+          }
+        }
+
+        if (Math.abs(matrix[maxRowIndex][pivotIndex]) < 1e-10) {
+          throw new Error("The services Lottie perspective transform could not be solved.");
+        }
+
+        if (maxRowIndex !== pivotIndex) {
+          [matrix[pivotIndex], matrix[maxRowIndex]] = [matrix[maxRowIndex], matrix[pivotIndex]];
+        }
+
+        const pivotValue = matrix[pivotIndex][pivotIndex];
+
+        for (let columnIndex = pivotIndex; columnIndex < columnCount; columnIndex += 1) {
+          matrix[pivotIndex][columnIndex] /= pivotValue;
+        }
+
+        for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+          if (rowIndex === pivotIndex) {
+            continue;
+          }
+
+          const factor = matrix[rowIndex][pivotIndex];
+
+          if (Math.abs(factor) < 1e-10) {
+            continue;
+          }
+
+          for (let columnIndex = pivotIndex; columnIndex < columnCount; columnIndex += 1) {
+            matrix[rowIndex][columnIndex] -= factor * matrix[pivotIndex][columnIndex];
+          }
+        }
+      }
+
+      return matrix.map((row) => row[columnCount - 1]);
+    }
+
+    function getHomographyMatrix(sourcePoints, destinationPoints) {
+      const matrix = [];
+
+      for (let pointIndex = 0; pointIndex < sourcePoints.length; pointIndex += 1) {
+        const sourcePoint = sourcePoints[pointIndex];
+        const destinationPoint = destinationPoints[pointIndex];
+
+        matrix.push([
+          sourcePoint.x,
+          sourcePoint.y,
+          1,
+          0,
+          0,
+          0,
+          -sourcePoint.x * destinationPoint.x,
+          -sourcePoint.y * destinationPoint.x,
+          destinationPoint.x,
+        ]);
+
+        matrix.push([
+          0,
+          0,
+          0,
+          sourcePoint.x,
+          sourcePoint.y,
+          1,
+          -sourcePoint.x * destinationPoint.y,
+          -sourcePoint.y * destinationPoint.y,
+          destinationPoint.y,
+        ]);
+      }
+
+      const solution = solveLinearSystem(matrix);
+
+      return {
+        h11: solution[0],
+        h12: solution[1],
+        h13: solution[2],
+        h21: solution[3],
+        h22: solution[4],
+        h23: solution[5],
+        h31: solution[6],
+        h32: solution[7],
+        h33: 1,
+      };
+    }
+
+    function applyLottiePerspective() {
+      if (!overlayLottieData) {
+        return;
+      }
+
+      const box = getRenderedVideoBox();
+      const destinationPoints = [
+        mapNormalizedPointToScreen(LOTTIE_TARGET_POINTS.topLeft, box),
+        mapNormalizedPointToScreen(LOTTIE_TARGET_POINTS.topRight, box),
+        mapNormalizedPointToScreen(LOTTIE_TARGET_POINTS.bottomRight, box),
+        mapNormalizedPointToScreen(LOTTIE_TARGET_POINTS.bottomLeft, box),
+      ];
+
+      const sourcePoints = [
+        { x: 0, y: 0 },
+        { x: overlayLottieData.w, y: 0 },
+        { x: overlayLottieData.w, y: overlayLottieData.h },
+        { x: 0, y: overlayLottieData.h },
+      ];
+
+      const homography = getHomographyMatrix(sourcePoints, destinationPoints);
+
+      lottieStage.style.width = `${overlayLottieData.w + 2}px`;
+      lottieStage.style.height = `${overlayLottieData.h}px`;
+      lottieStage.style.transform = `matrix3d(${[
+        homography.h11,
+        homography.h21,
+        0,
+        homography.h31,
+        homography.h12,
+        homography.h22,
+        0,
+        homography.h32,
+        0,
+        0,
+        1,
+        0,
+        homography.h13,
+        homography.h23,
+        0,
+        homography.h33,
+      ].join(",")})`;
+    }
+
+    function requestLottieLayout() {
+      if (!overlayLottieData) {
+        return;
+      }
+
+      if (lottieLayoutFrameId !== null) {
+        cancelAnimationFrame(lottieLayoutFrameId);
+      }
+
+      lottieLayoutFrameId = requestAnimationFrame(() => {
+        lottieLayoutFrameId = null;
+        applyLottiePerspective();
+      });
+    }
+
+    function startLottieOverlay() {
+      shouldShowLottie = true;
+
+      if (!overlayLottieAnimation || !isLottieDomReady) {
+        return;
+      }
+
+      lottieLayer.classList.add("is-visible");
+      requestLottieLayout();
+      overlayLottieAnimation.goToAndPlay(0, true);
+    }
+
+    function getSidePanelGallerySlides() {
+      return Array.from(sidePanelGalleryTrack.querySelectorAll(".services-side-panel-gallery-slide"));
+    }
+
+    function renderSidePanelGallery(machineKey) {
+      const galleryImages = MACHINE_GALLERY_IMAGES[machineKey] ?? MACHINE_GALLERY_IMAGES.lathe;
+      sidePanelGalleryTrack.innerHTML = galleryImages
+        .map((imageUrl, index) => `
+          <figure class="services-side-panel-gallery-slide">
+            <img src="${imageUrl}" alt="CNC ${machineKey} gallery image ${index + 1}" />
+          </figure>
+        `)
+        .join("");
+      sidePanelGalleryPrev.setAttribute("aria-label", `Show previous ${machineKey} image`);
+      sidePanelGalleryNext.setAttribute("aria-label", `Show next ${machineKey} image`);
+    }
+
+    function getProtoGallerySlides(kind) {
+      const gallery = protoGalleryElements[kind];
+      return gallery ? Array.from(gallery.track.querySelectorAll(".services-side-panel-proto-gallery-slide")) : [];
+    }
+
+    function renderProtoGallery(kind) {
+      const gallery = protoGalleryElements[kind];
+
+      if (!gallery) {
+        return;
+      }
+
+      const galleryImages = PROTO_GALLERY_IMAGES[kind] ?? [];
+      gallery.track.innerHTML = galleryImages
+        .map((imageUrl, index) => `
+          <figure class="services-side-panel-proto-gallery-slide">
+            <img src="${imageUrl}" alt="Proto ${gallery.label} gallery image ${index + 1}" />
+          </figure>
+        `)
+        .join("");
+      const hasImages = galleryImages.length > 0;
+      gallery.prev.hidden = !hasImages;
+      gallery.next.hidden = !hasImages;
+      gallery.prev.disabled = galleryImages.length <= 1;
+      gallery.next.disabled = galleryImages.length <= 1;
+      gallery.viewport.scrollTo({ left: 0, behavior: "auto" });
+    }
+
+    function scrollSidePanelGallery(direction) {
+      const slideCount = getSidePanelGallerySlides().length;
+      const slideWidth = Math.max(sidePanelGalleryViewport.clientWidth, 1);
+
+      if (!slideCount || !slideWidth) {
+        return;
+      }
+
+      const currentIndex = Math.round(sidePanelGalleryViewport.scrollLeft / slideWidth);
+      const nextIndex = (currentIndex + direction + slideCount) % slideCount;
+
+      sidePanelGalleryViewport.scrollTo({
+        left: nextIndex * slideWidth,
+        behavior: "smooth",
+      });
+    }
+
+    function scrollProtoGallery(kind, direction) {
+      const gallery = protoGalleryElements[kind];
+      const slideCount = getProtoGallerySlides(kind).length;
+
+      if (!gallery || !slideCount) {
+        return;
+      }
+
+      const slideWidth = Math.max(gallery.viewport.clientWidth, 1);
+      const currentIndex = Math.round(gallery.viewport.scrollLeft / slideWidth);
+      const nextIndex = (currentIndex + direction + slideCount) % slideCount;
+
+      gallery.viewport.scrollTo({
+        left: nextIndex * slideWidth,
+        behavior: "smooth",
+      });
+    }
+
+    function updateSidePanel(machineKey) {
+      const machineConfig = MACHINE_CONFIGS[machineKey];
+      const usesGalleryPanel = machineKey === "lathe" || machineKey === "mill";
+
+      if (!machineConfig) {
+        return;
+      }
+
+      sidePanel.setAttribute("aria-label", `${machineConfig.title} information`);
+      sidePanel.classList.toggle("is-on-right", machineKey === "proto");
+      sidePanel.classList.toggle("is-proto", machineKey === "proto");
+      sidePanel.classList.toggle("is-lathe", usesGalleryPanel);
+      sidePanelStandard.hidden = machineKey === "proto";
+      sidePanelProto.hidden = machineKey !== "proto";
+      sidePanelImage.classList.toggle("is-gallery", usesGalleryPanel);
+      sidePanelGallery.hidden = !usesGalleryPanel;
+      sidePanelGalleryIntro.hidden = !usesGalleryPanel;
+      sidePanelImageLabel.hidden = usesGalleryPanel;
+      sidePanelTitle.textContent = machineConfig.title;
+      sidePanelCopy.textContent = machineConfig.copy;
+      sidePanelAction.href = machineConfig.detailsHref;
+
+      if (usesGalleryPanel) {
+        renderSidePanelGallery(machineKey);
+        requestAnimationFrame(() => {
+          sidePanelGalleryViewport.scrollTo({
+            left: 0,
+            behavior: "auto",
+          });
+        });
+      } else if (machineKey === "proto") {
+        renderProtoGallery("injection");
+        renderProtoGallery("printing");
+      }
+    }
+
+    function updateHintBox() {
+      const shouldShowHint = currentPart === PlaybackPart.PAUSED_STAGE && !isHintDismissed;
+
+      if (shouldShowHint) {
+        hintBox.hidden = false;
+        hintBox.classList.remove("is-dismissing");
+        return;
+      }
+
+      hintBox.hidden = true;
+      hintBox.classList.remove("is-dismissing");
+    }
+
+    function syncControls() {
+      const isMachinePart =
+        currentPart === PlaybackPart.LATHE_PAUSED ||
+        currentPart === PlaybackPart.MILL_PAUSED ||
+        currentPart === PlaybackPart.PROTO_PAUSED;
+      const shouldShowMachineUi = isMachinePart && !isMachineUiSuppressed;
+
+      if (shouldShowMachineUi) {
+        showUiElement(controls);
+        showUiElement(sidePanel);
+      } else {
+        hideUiElement(controls);
+        hideUiElement(sidePanel);
+      }
+
+      backButton.hidden = !shouldShowMachineUi;
+      backButton.disabled = isBusy;
+      updateHintBox();
+
+      if (currentPart === PlaybackPart.PAUSED_STAGE && !isBusy) {
+        enableMachineHotspots();
+      } else {
+        disableMachineHotspots();
+      }
+    }
+
+    async function initialiseLottieOverlay() {
+      if (!window.lottie || typeof window.lottie.loadAnimation !== "function") {
+        console.warn("The Lottie runtime failed to load on services.html.");
+        return;
+      }
+
+      try {
+        const response = await fetch(LOTTIE_PATH);
+
+        if (!response.ok) {
+          throw new Error(`Failed to load ${LOTTIE_PATH}: ${response.status}`);
+        }
+
+        overlayLottieData = await response.json();
+        overlayLottieAnimation = window.lottie.loadAnimation({
+          container: lottieStage,
+          renderer: "svg",
+          loop: true,
+          autoplay: false,
+          animationData: overlayLottieData,
+          rendererSettings: {
+            preserveAspectRatio: "none",
+          },
+        });
+        overlayLottieAnimation.setSpeed(1.5);
+
+        overlayLottieAnimation.addEventListener("DOMLoaded", () => {
+          isLottieDomReady = true;
+          requestLottieLayout();
+          if (shouldShowLottie) {
+            startLottieOverlay();
+          }
+        });
+      } catch (error) {
+        console.warn("The services Lottie overlay could not be initialised:", error);
+      }
+    }
+
+    function pauseIntoPart2() {
+      clearBoundaryWatcher();
+      video.pause();
+      video.currentTime = firstPartEndTime;
+      setPart(PlaybackPart.PAUSED_STAGE);
+      startLottieOverlay();
+    }
+
+    async function waitForSeek(targetTime) {
+      const clampedTime = Math.max(0, targetTime);
+
+      if (
+        video.readyState >= HTMLMediaElement.HAVE_METADATA &&
+        Math.abs(video.currentTime - clampedTime) <= FRAME_TOLERANCE_SECONDS
+      ) {
+        return;
+      }
+
+      await new Promise((resolve, reject) => {
+        const handleSeeked = () => {
+          cleanup();
+          resolve();
+        };
+
+        const handleError = () => {
+          cleanup();
+          reject(video.error ?? new Error("Services video seek failed."));
+        };
+
+        const cleanup = () => {
+          video.removeEventListener("seeked", handleSeeked);
+          video.removeEventListener("error", handleError);
+        };
+
+        video.addEventListener("seeked", handleSeeked, { once: true });
+        video.addEventListener("error", handleError, { once: true });
+        video.currentTime = clampedTime;
+      });
+    }
+
+    async function ensureVideoSource(url) {
+      if (currentVideoUrl === url && video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        return;
+      }
+
+      currentVideoUrl = url;
+      clearBoundaryWatcher();
+
+      await new Promise((resolve, reject) => {
+        const handleLoadedMetadata = () => {
+          cleanup();
+          requestLottieLayout();
+          requestHotspotLayout();
+          resolve();
+        };
+
+        const handleError = () => {
+          cleanup();
+          reject(video.error ?? new Error(`Loading ${url} failed.`));
+        };
+
+        const cleanup = () => {
+          video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+          video.removeEventListener("error", handleError);
+        };
+
+        video.addEventListener("loadedmetadata", handleLoadedMetadata, { once: true });
+        video.addEventListener("error", handleError, { once: true });
+        video.src = url;
+        video.load();
+      });
+    }
+
+    async function playForwardSegment(startTime, endTime, completion) {
+      await waitForSeek(startTime);
+      await video.play();
+      requestAnimationFrame(() => {
+        hideVideoFreezeFrame();
+      });
+
+      return new Promise((resolve, reject) => {
+        let didFinish = false;
+
+        const finish = () => {
+          if (didFinish) {
+            return;
+          }
+
+          didFinish = true;
+          clearBoundaryWatcher();
+          video.removeEventListener("ended", handleEnded);
+          Promise.resolve()
+            .then(() => completion())
+            .then(resolve)
+            .catch(reject);
+        };
+
+        const handleEnded = () => {
+          finish();
+        };
+
+        const tick = () => {
+          if (video.ended || video.currentTime >= endTime - FRAME_TOLERANCE_SECONDS) {
+            finish();
+            return;
+          }
+
+          if ("requestVideoFrameCallback" in HTMLVideoElement.prototype) {
+            boundaryFrameCallbackId = video.requestVideoFrameCallback(() => {
+              tick();
+            });
+          } else {
+            boundaryFallbackRafId = requestAnimationFrame(() => {
+              tick();
+            });
+          }
+        };
+
+        clearBoundaryWatcher();
+        video.addEventListener("ended", handleEnded, { once: true });
+        tick();
+      });
+    }
+
+    function startBoundaryWatcher() {
+      clearBoundaryWatcher();
+
+      const tick = () => {
+        if (currentPart !== PlaybackPart.INTRO) {
+          clearBoundaryWatcher();
+          return;
+        }
+
+        if (video.currentTime >= firstPartEndTime - FRAME_TOLERANCE_SECONDS) {
+          pauseIntoPart2();
+          return;
+        }
+
+        if ("requestVideoFrameCallback" in HTMLVideoElement.prototype) {
+          boundaryFrameCallbackId = video.requestVideoFrameCallback(() => {
+            tick();
+          });
+        } else {
+          boundaryFallbackRafId = requestAnimationFrame(() => {
+            tick();
+          });
+        }
+      };
+
+      tick();
+    }
+
+    async function waitForMetadata() {
+      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        return;
+      }
+
+      await new Promise((resolve, reject) => {
+        const handleLoadedMetadata = () => {
+          cleanup();
+          resolve();
+        };
+
+        const handleError = () => {
+          cleanup();
+          reject(video.error ?? new Error("Services video failed to load."));
+        };
+
+        const cleanup = () => {
+          video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+          video.removeEventListener("error", handleError);
+        };
+
+        video.addEventListener("loadedmetadata", handleLoadedMetadata, { once: true });
+        video.addEventListener("error", handleError, { once: true });
+      });
+    }
+
+    async function boot() {
+      try {
+        await initialiseMachineHotspots();
+        await waitForMetadata();
+        await video.play();
+        hideFallback();
+        requestLottieLayout();
+        requestHotspotLayout();
+        startBoundaryWatcher();
+      } catch (error) {
+        console.warn("Services intro playback failed:", error);
+        showFallback();
+      }
+    }
+
+    async function playMachineIntro(machineKey) {
+      const machineConfig = MACHINE_CONFIGS[machineKey];
+
+      if (!machineConfig || isBusy || currentPart !== PlaybackPart.PAUSED_STAGE) {
+        return;
+      }
+
+      try {
+        isBusy = true;
+        syncControls();
+        stopLottieOverlay();
+        showVideoFreezeFrame();
+        await ensureVideoSource(machineConfig.videoUrl);
+        await playForwardSegment(0, machinePartEndTime, async () => {
+          video.pause();
+          await waitForSeek(machinePartEndTime);
+          activeMachineKey = machineKey;
+          updateSidePanel(machineKey);
+          setPart(machineConfig.pausedPart);
+        });
+      } catch (error) {
+        console.warn(`Playing the ${machineKey} intro failed:`, error);
+        showFallback();
+      } finally {
+        isBusy = false;
+        syncControls();
+      }
+    }
+
+    async function playMachineBackToPart2() {
+      const machineConfig = activeMachineKey ? MACHINE_CONFIGS[activeMachineKey] : null;
+
+      if (!machineConfig || isBusy || currentPart !== machineConfig.pausedPart) {
+        return;
+      }
+
+      try {
+        isBusy = true;
+        isMachineUiSuppressed = true;
+        syncControls();
+        showVideoFreezeFrame();
+        const startTime = Math.max(0, (video.duration || 0) - (MACHINE_RETURN_FRAME_COUNT / VIDEO_FRAME_RATE));
+        await playForwardSegment(startTime, Math.max(startTime, video.duration || startTime), async () => {
+          video.pause();
+          showVideoFreezeFrame();
+          await ensureVideoSource(MENU_VIDEO_URL);
+          await waitForSeek(firstPartEndTime);
+          activeMachineKey = null;
+          setPart(PlaybackPart.PAUSED_STAGE);
+          startLottieOverlay();
+          requestAnimationFrame(() => {
+            hideVideoFreezeFrame();
+          });
+        });
+      } catch (error) {
+        console.warn("Playing the machine back segment failed:", error);
+        showFallback();
+      } finally {
+        isBusy = false;
+        syncControls();
+      }
+    }
+
+    video.addEventListener("playing", hideFallback);
+    video.addEventListener("error", showFallback);
+    video.addEventListener("loadedmetadata", requestLottieLayout, { once: true });
+    video.addEventListener("loadedmetadata", requestHotspotLayout, { once: true });
+    sidePanelGalleryPrev.addEventListener("click", () => {
+      scrollSidePanelGallery(-1);
+    });
+    sidePanelGalleryNext.addEventListener("click", () => {
+      scrollSidePanelGallery(1);
+    });
+    protoGalleryInjectionPrev.addEventListener("click", () => {
+      scrollProtoGallery("injection", -1);
+    });
+    protoGalleryInjectionNext.addEventListener("click", () => {
+      scrollProtoGallery("injection", 1);
+    });
+    protoGalleryPrintingPrev.addEventListener("click", () => {
+      scrollProtoGallery("printing", -1);
+    });
+    protoGalleryPrintingNext.addEventListener("click", () => {
+      scrollProtoGallery("printing", 1);
+    });
+    backButton.addEventListener("click", () => {
+      playMachineBackToPart2();
+    });
+    hotspotLayer.addEventListener("pointermove", (event) => {
+      updateMachineHotspotHit(event.clientX, event.clientY);
+    });
+    hotspotLayer.addEventListener("pointerleave", () => {
+      setActiveHotspotMachine(null);
+    });
+    hotspotLayer.addEventListener("click", (event) => {
+      const clickedHotspotKey = activeHotspotMachineKey;
+
+      if (!clickedHotspotKey) {
+        return;
+      }
+
+      event.preventDefault();
+      if (currentPart === PlaybackPart.PAUSED_STAGE && !isHintDismissed) {
+        isHintDismissed = true;
+        dismissHintBox();
+      }
+      const hotspotConfig = HOTSPOT_CONFIGS[clickedHotspotKey];
+
+      if (!hotspotConfig) {
+        return;
+      }
+
+      if (hotspotConfig.action === "navigate") {
+        window.location.href = hotspotConfig.href;
+        return;
+      }
+
+      playMachineIntro(clickedHotspotKey);
+    });
+
+    window.addEventListener("resize", requestLottieLayout, { passive: true });
+    window.addEventListener("resize", requestHotspotLayout, { passive: true });
+
+    window.addEventListener("beforeunload", () => {
+      clearBoundaryWatcher();
+    });
+
+    setPart(PlaybackPart.INTRO);
+    initialiseLottieOverlay();
+    boot();
+  </script>
+</body>
+</html>

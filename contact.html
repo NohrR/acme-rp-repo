@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACME</title>
+  <link rel="icon" type="image/png" href="./assets/ACMEFavicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    html,
+    body.main-page,
+    .news-gallery-card {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body.main-page::-webkit-scrollbar,
+    .news-gallery-card::-webkit-scrollbar {
+      display: none;
+    }
+
+    body.main-page {
+      position: relative;
+      overflow-y: auto;
+      background: #ff8434;
+      padding-top: 0;
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      overscroll-behavior-y: contain;
+    }
+
+    .page-load-reveal {
+      opacity: 0;
+      transform: translateY(34px) scale(0.985);
+      transition:
+        opacity 720ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 820ms cubic-bezier(0.22, 1, 0.36, 1);
+      transition-delay: var(--reveal-delay, 0ms);
+      will-change: opacity, transform;
+    }
+
+    body.main-page.is-page-ready .page-load-reveal {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-load-reveal,
+      body.main-page.is-page-ready .page-load-reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
+
+    .main-page .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 50px 0 12px;
+    }
+
+    .main-corner-anchor {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .main-corner-asset {
+      display: block;
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .main-corner-asset {
+      width: clamp(500px, 10vw, 500px);
+      max-width: 18vw;
+    }
+
+    .news-section-dots {
+      position: fixed;
+      top: 50%;
+      right: clamp(14px, 2vw, 24px);
+      transform: translateY(-50%);
+      z-index: 96;
+      display: grid;
+      gap: 14px;
+    }
+
+    .news-section-dot {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 249, 240, 0.62);
+      border-radius: 999px;
+      background: transparent;
+      cursor: pointer;
+      transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+    }
+
+    .news-section-dot:hover {
+      transform: scale(1.08);
+    }
+
+    .news-section-dot.is-active {
+      border-color: #ffffff;
+      background: #ffffff;
+    }
+
+    .main-shell {
+      width: calc(100vw - 100px);
+      min-height: calc(100vh - 100px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: clamp(20px, 3vw, 34px);
+      padding-bottom: clamp(10px, 1.4vw, 16px);
+      padding-left: clamp(100px, 3vw, 42px);
+      padding-right: clamp(100px, 3vw, 42px);
+      position: relative;
+    }
+
+    .contact-page-spacer {
+      min-height: 0;
+    }
+
+    .contact-stage {
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .contact-panel {
+      width: min(1180px, 100%);
+      border: 2px solid rgba(255, 255, 255, 0.94);
+      border-radius: 36px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 38px rgba(128, 56, 0, 0.12);
+      backdrop-filter: blur(10px);
+      padding: clamp(24px, 3vw, 40px);
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(24px, 3vw, 42px);
+    }
+
+    .contact-copy {
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+
+    .contact-kicker {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 249, 240, 0.78);
+    }
+
+    .contact-title {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 0.98;
+      text-transform: uppercase;
+      color: #fff9f0;
+    }
+
+    .contact-summary {
+      margin: 0;
+      max-width: 42ch;
+      font-size: 17px;
+      line-height: 1.8;
+      color: rgba(255, 249, 240, 0.86);
+    }
+
+    .contact-info-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .contact-card {
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 20px 22px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .contact-card-label {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 249, 240, 0.66);
+    }
+
+    .contact-card-value,
+    .contact-card-value a {
+      margin: 0;
+      color: #fff9f0;
+      text-decoration: none;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.18;
+    }
+
+    .contact-card-meta {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(255, 249, 240, 0.84);
+    }
+
+    .contact-form-card {
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: clamp(22px, 2.5vw, 32px);
+      display: grid;
+      gap: 20px;
+      align-content: start;
+    }
+
+    .contact-form-head {
+      display: grid;
+      gap: 8px;
+    }
+
+    .contact-form-title {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(24px, 2vw, 32px);
+      line-height: 1;
+      text-transform: uppercase;
+      color: #fff9f0;
+    }
+
+    .contact-form-copy {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(255, 249, 240, 0.8);
+    }
+
+    .contact-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .contact-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .contact-field--full {
+      grid-column: 1 / -1;
+    }
+
+    .contact-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 249, 240, 0.72);
+    }
+
+    .contact-input,
+    .contact-textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #111111;
+      font: inherit;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .contact-textarea {
+      min-height: 160px;
+      resize: vertical;
+    }
+
+    .contact-input:focus,
+    .contact-textarea:focus {
+      border-color: rgba(255, 121, 55, 0.58);
+      box-shadow: 0 0 0 3px rgba(255, 121, 55, 0.14);
+    }
+
+    .contact-form-foot {
+      grid-column: 1 / -1;
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+    }
+
+    .contact-form-note {
+      margin: 0;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255, 249, 240, 0.72);
+    }
+
+    .contact-submit {
+      min-width: 180px;
+      min-height: 52px;
+      border: 0;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #111111;
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+    }
+
+    .contact-submit:hover {
+      transform: translateY(-1px);
+      opacity: 0.92;
+      box-shadow: 0 14px 24px rgba(102, 44, 0, 0.14);
+    }
+
+    .news-page-section {
+      min-height: calc(100vh - 100px);
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .news-page-section-primary {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: clamp(20px, 3vw, 34px);
+      align-content: start;
+    }
+
+    .main-stage-top {
+      position: relative;
+      z-index: 140;
+      min-height: clamp(56px, 6vw, 82px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-brand-lockup {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+    }
+
+    .main-home-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .main-logo-corner {
+      display: block;
+      width: clamp(126px, 11vw, 184px);
+      max-width: 24vw;
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .main-page .nav-link {
+      color: rgba(255, 255, 255, 0.92);
+      font-size: clamp(16px, 1.15vw, 18px);
+    }
+
+    .main-page .nav-link::after {
+      background: #ffffff;
+    }
+
+    .main-page .nav-link:hover,
+    .main-page .nav-link[aria-current="page"] {
+      color: #ffffff;
+    }
+
+    .main-page .site-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(18px, 2.5vw, 36px);
+      flex-wrap: wrap;
+    }
+
+    .contact-page-title {
+      margin: 0;
+      text-align: center;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(42px, 6vw, 88px);
+      line-height: 0.94;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fff9f0;
+      text-shadow: 0 14px 30px rgba(120, 54, 0, 0.18);
+    }
+
+    .main-hero {
+      width: 100%;
+      max-width: none;
+      min-height: clamp(320px, 44vw, 560px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-copy {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .news-center-frame {
+      width: min(1080px, 100%);
+      min-height: clamp(320px, 40vw, 520px);
+      max-height: min(520px, calc(100vh - 220px));
+      border: 2px solid rgba(255, 255, 255, 0.94);
+      border-radius: 36px;
+      background: transparent;
+      padding: clamp(20px, 2.6vw, 30px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .news-frame-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .news-frame-copy {
+      display: grid;
+      gap: 8px;
+    }
+
+    .news-frame-kicker {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #fff9f0;
+    }
+
+    .news-status {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 249, 240, 0.78);
+    }
+
+    .news-gallery-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .news-gallery-button {
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 2px solid rgba(255, 255, 255, 0.92);
+      border-radius: 999px;
+      background: transparent;
+      color: #fff9f0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
+    }
+
+    .news-gallery-button:hover:not(:disabled) {
+      opacity: 0.82;
+      transform: translateY(-1px);
+    }
+
+    .news-gallery-button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .news-gallery {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 0;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      overscroll-behavior-x: contain;
+    }
+
+    .news-gallery::-webkit-scrollbar {
+      display: none;
+    }
+
+    .news-gallery-card,
+    .news-card,
+    .news-empty {
+      border: 1px solid rgb(255, 255, 255);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 38px rgba(128, 56, 0, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .news-gallery-card {
+      flex: 0 0 100%;
+      width: 100%;
+      min-height: 100%;
+      max-height: calc(100vh - 300px);
+      padding: 22px 32px 22px 22px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+      position: relative;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .news-card {
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .news-card-image-wrap {
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .news-card-image {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+
+    .news-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 249, 240, 0.66);
+    }
+
+    .news-article-title {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(22px, 2.1vw, 32px);
+      line-height: 1.04;
+      color: #fff9f0;
+    }
+
+    .news-summary {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(255, 249, 240, 0.86);
+    }
+
+    .news-body {
+      display: grid;
+      gap: 12px;
+    }
+
+    .news-body p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(255, 249, 240, 0.74);
+    }
+
+    .news-gallery-card .news-card-image-wrap {
+      border-radius: 24px;
+    }
+
+    .news-gallery-card .news-card-image {
+      aspect-ratio: 16 / 7;
+    }
+
+    .news-gallery-card .news-article-title {
+      font-size: clamp(28px, 2.8vw, 42px);
+    }
+
+    .news-gallery-card .news-summary {
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    .news-gallery-card .news-body {
+      gap: 14px;
+    }
+
+    .news-gallery-card .news-body p {
+      font-size: 15px;
+      line-height: 1.8;
+      color: rgba(255, 249, 240, 0.82);
+    }
+
+    .news-grid-section {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .news-grid-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .news-grid-title {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(24px, 2.3vw, 34px);
+      line-height: 1;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff9f0;
+    }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .news-empty {
+      padding: 28px;
+      text-align: center;
+      color: rgba(255, 249, 240, 0.82);
+    }
+
+    .news-gallery > .news-empty {
+      flex: 0 0 100%;
+    }
+
+    .news-grid > .news-empty {
+      grid-column: 1 / -1;
+    }
+
+    .main-scene-panel {
+      display: none;
+    }
+
+    @media (max-width: 960px) {
+      .main-shell {
+        width: calc(100vw - 100px);
+        min-height: calc(100vh - 100px);
+      }
+
+      .news-page-section {
+        min-height: calc(100vh - 100px);
+      }
+
+      .main-brand-lockup {
+        position: relative;
+        transform: none;
+        justify-self: start;
+      }
+
+      .main-stage-top {
+        min-height: auto;
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+      }
+
+      .main-page .site-nav {
+        gap: 12px 20px;
+        justify-self: center;
+      }
+
+      .main-hero {
+        min-height: auto;
+      }
+
+      .main-copy {
+        width: 100%;
+      }
+
+      .news-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .contact-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .main-page .page {
+        padding: 24px 0 8px;
+      }
+
+      .main-shell {
+        width: calc(100vw - 32px);
+        min-height: calc(100vh - 32px);
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .news-page-section {
+        min-height: calc(100vh - 32px);
+      }
+
+      .news-center-frame {
+        padding: 18px;
+      }
+
+      .news-gallery-card {
+        padding: 18px;
+      }
+
+      .news-gallery-button {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0 16px;
+      }
+
+      .news-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .contact-form {
+        grid-template-columns: 1fr;
+      }
+
+      .contact-form-foot {
+        align-items: stretch;
+      }
+
+      .contact-submit {
+        width: 100%;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="neutral-theme-overrides.css" />
+</head>
+<body class="main-page">
+  <div class="main-corner-anchor" aria-hidden="true">
+    <img
+      class="main-corner-asset"
+      src="./ASSETS/CornerAsset.png"
+      alt=""
+      aria-hidden="true"
+    />
+  </div>
+
+  <main class="page">
+    <div class="main-shell">
+      <header class="main-stage-top page-load-reveal" style="--reveal-delay: 40ms;" aria-label="Site header">
+        <div class="main-brand-lockup">
+          <a class="main-home-link" href="./main.html" aria-label="Return to main page">
+            <img
+              class="main-logo-corner"
+              src="./ASSETS/acme.png"
+              alt="ACME logo"
+            />
+          </a>
+        </div>
+
+        <nav class="site-nav" aria-label="Primary">
+          <a class="nav-link" href="./about.html">ABOUT</a>
+          <div class="nav-dropdown">
+            <a class="nav-link" href="./services.html">SERVICES</a>
+            <div class="nav-dropdown-menu" aria-label="Services links">
+              <a class="nav-dropdown-link" href="./services.html">Interactive Overview</a>
+              <a class="nav-dropdown-link" href="./services-detailed.html">Full Service Breakdown</a>
+            </div>
+          </div>
+          <a class="nav-link" href="./news.html">NEWS</a>
+          <a class="nav-link" href="./contact.html">CONTACT</a>
+        </nav>
+      </header>
+
+      <h1 class="contact-page-title page-load-reveal" style="--reveal-delay: 120ms;">Contact</h1>
+
+      <section class="contact-stage page-load-reveal" style="--reveal-delay: 180ms;" aria-labelledby="contact-title">
+        <div class="contact-panel">
+          <div class="contact-copy">
+            <h1 class="contact-title" id="contact-title">Let's Start the Conversation</h1>
+            <p class="contact-summary">Reach out for project discussions, production questions, quote requests, or a full manufacturing overview. We can connect by email, phone, or WeChat.</p>
+
+            <div class="contact-info-grid">
+              <article class="contact-card">
+                <p class="contact-card-label">Email</p>
+                <p class="contact-card-value"><a href="mailto:Jacky@acme-rp.com">Jacky@acme-rp.com</a></p>
+                <p class="contact-card-value"><a href="mailto:Edison@acme-rp.com">Edison@acme-rp.com</a></p>
+              </article>
+
+              <article class="contact-card">
+                <p class="contact-card-label">WeChat</p>
+                <p class="contact-card-value">+1 350-965-2415</p>
+              </article>
+
+              <article class="contact-card">
+                <p class="contact-card-label">Mobile</p>
+                <p class="contact-card-value"><a href="tel:+8613509652415">+1 350-965-2415</a></p>
+              </article>
+
+              <article class="contact-card">
+                <p class="contact-card-label">Address</p>
+                <p class="contact-card-meta">M102, 1st Floor, Building 1, No.8 buge Road, Tianxin Industrial Zone, Tangxia Town, Dongguan city China</p>
+                <p class="contact-card-meta">Zip Code: 523710</p>
+              </article>
+            </div>
+          </div>
+
+          <section class="contact-form-card" aria-labelledby="contact-form-title">
+            <div class="contact-form-head">
+              <h2 class="contact-form-title" id="contact-form-title">Send an Inquiry</h2>
+              <p class="contact-form-copy">Share a few details and your preferred contact method, and we'll have the right person follow up.</p>
+            </div>
+
+            <form class="contact-form" action="#" method="post">
+              <div class="contact-field">
+                <label class="contact-label" for="contact-name">Name</label>
+                <input class="contact-input" id="contact-name" name="name" type="text" autocomplete="name" />
+              </div>
+
+              <div class="contact-field">
+                <label class="contact-label" for="contact-email">E-mail</label>
+                <input class="contact-input" id="contact-email" name="email" type="email" autocomplete="email" />
+              </div>
+
+              <div class="contact-field">
+                <label class="contact-label" for="contact-phone">Phone</label>
+                <input class="contact-input" id="contact-phone" name="phone" type="tel" autocomplete="tel" />
+              </div>
+
+              <div class="contact-field contact-field--full">
+                <label class="contact-label" for="contact-message">Message</label>
+                <textarea class="contact-textarea" id="contact-message" name="message"></textarea>
+              </div>
+
+              <div class="contact-form-foot">
+                <p class="contact-form-note">This form is currently a front-end layout and is ready to be connected to your preferred submission workflow.</p>
+                <button class="contact-submit" type="submit">Submit</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <footer class="page-site-footer page-load-reveal" style="--reveal-delay: 260ms;" aria-label="Site footer">
+        <div class="page-site-footer__inner">
+          <div class="page-site-footer__brand">
+            <img class="page-site-footer__logo" src="./assets/acme.png" alt="ACME logo" />
+          </div>
+          <div class="page-site-footer__social" aria-label="Social media">
+            <div class="page-site-footer__social-links">
+              <button class="page-site-footer__social-button" type="button" aria-label="Instagram">
+                <svg class="page-site-footer__social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect>
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle>
+                </svg>
+              </button>
+              <button class="page-site-footer__social-button" type="button" aria-label="Facebook">
+                <svg class="page-site-footer__social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M13.4 20.5v-7h2.3l.35-2.8H13.4V8.95c0-.81.23-1.36 1.39-1.36h1.48V5.1c-.26-.04-1.14-.1-2.17-.1-2.15 0-3.62 1.31-3.62 3.73v1.97H8v2.8h2.52v7h2.88Z"></path>
+                </svg>
+              </button>
+            </div>
+            <p class="page-site-footer__copy">Copyright &copy; ACME Mold Ltd. All Rights Reserved</p>
+          </div>
+          <div class="page-site-footer__credit" aria-label="Zezu logo">
+            <img class="page-site-footer__creator-logo" src="./assets/zezu.png" alt="Zezu logo" />
+            <p class="page-site-footer__creator-label">Site created by</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const body = document.body;
+
+      if (!body) {
+        return;
+      }
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        body.classList.add("is-page-ready");
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          body.classList.add("is-page-ready");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

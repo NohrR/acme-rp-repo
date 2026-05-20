@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACME Services</title>
+  <link rel="icon" type="image/png" href="./assets/ACMEFavicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body.main-page {
+      position: relative;
+      overflow: hidden;
+      background: #ff8434;
+      padding-top: 0;
+    }
+
+    .page-load-reveal {
+      opacity: 0;
+      transform: translateY(28px) scale(0.985);
+      transition:
+        opacity 720ms ease,
+        transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
+      transition-delay: var(--reveal-delay, 0ms);
+      will-change: opacity, transform;
+    }
+
+    body.main-page.is-page-ready .page-load-reveal {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-load-reveal,
+      body.main-page.is-page-ready .page-load-reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
+
+    .main-page .page {
+      position: relative;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      overscroll-behavior-y: contain;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .main-page .page::-webkit-scrollbar {
+      display: none;
+    }
+
+    .main-corner-anchor {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      pointer-events: none;
+    }
+
+    .main-corner-asset {
+      display: block;
+      width: clamp(500px, 10vw, 500px);
+      max-width: 18vw;
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .main-shell {
+      width: calc(100vw - 100px);
+      min-height: 100vh;
+      padding-bottom: clamp(28px, 3vw, 42px);
+      padding-left: clamp(42px, 3vw, 100px);
+      padding-right: clamp(42px, 3vw, 100px);
+      position: relative;
+    }
+
+    .main-stage-top {
+      position: fixed;
+      top: clamp(26px, 3vw, 40px);
+      left: clamp(42px, 4vw, 72px);
+      right: clamp(42px, 4vw, 72px);
+      z-index: 140;
+      min-height: clamp(56px, 6vw, 82px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-brand-lockup {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+    }
+
+    .main-home-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .main-logo-corner {
+      display: block;
+      width: clamp(126px, 11vw, 184px);
+      max-width: 24vw;
+      height: auto;
+      user-select: none;
+    }
+
+    .main-page .nav-link {
+      color: rgba(255, 255, 255, 0.92);
+      font-size: clamp(16px, 1.15vw, 18px);
+    }
+
+    .main-page .nav-link::after {
+      background: #ffffff;
+    }
+
+    .main-page .nav-link:hover,
+    .main-page .nav-link[aria-current="page"] {
+      color: #ffffff;
+    }
+
+    .main-page .site-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(18px, 2.5vw, 36px);
+      flex-wrap: wrap;
+    }
+
+    .services-detailed-stage {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .services-detailed-panel {
+      width: min(1120px, 100%);
+      min-height: calc(100vh - 160px);
+      display: grid;
+      grid-template-columns: minmax(280px, 0.88fr) minmax(320px, 1.12fr);
+      align-items: center;
+      gap: clamp(28px, 4vw, 56px);
+      padding: clamp(120px, 16vh, 180px) 0 clamp(56px, 9vh, 96px);
+    }
+
+    .services-detailed-panel--footer {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: clamp(24px, 4vh, 40px);
+      min-height: calc(100vh - 160px);
+      padding: clamp(120px, 16vh, 180px) 0 clamp(16px, 3vh, 28px);
+    }
+
+    .services-detailed-feature-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(280px, 0.88fr) minmax(320px, 1.12fr);
+      align-items: center;
+      gap: clamp(28px, 4vw, 56px);
+    }
+
+    .services-detailed-copy {
+      display: grid;
+      gap: 16px;
+      max-width: 560px;
+    }
+
+    .services-detailed-kicker {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255, 249, 240, 0.78);
+    }
+
+    .services-detailed-title {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(34px, 4.4vw, 68px);
+      line-height: 0.98;
+      text-transform: uppercase;
+      color: #fff9f0;
+    }
+
+    .services-detailed-summary {
+      margin: 0;
+      font-size: clamp(17px, 1.45vw, 22px);
+      line-height: 1.75;
+      color: rgba(255, 249, 240, 0.86);
+    }
+
+    .services-detailed-visual {
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .services-detailed-number {
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(110px, 16vw, 200px);
+      line-height: 0.82;
+      letter-spacing: 0.03em;
+      color: rgba(255, 249, 240, 0.16);
+      user-select: none;
+    }
+
+.services-detailed-video-slot {
+  width: min(100%, 520px);
+  aspect-ratio: 16 / 10;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 38px rgba(128, 56, 0, 0.12);
+  object-fit: cover;
+  display: block;
+  overflow: hidden;
+}
+
+    .services-detailed-usage {
+      margin: 0;
+      font-size: clamp(15px, 1.15vw, 18px);
+      line-height: 1.75;
+      color: rgba(255, 249, 240, 0.78);
+    }
+
+    .services-detailed-cta {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .services-detailed-cta-label {
+      margin: 0;
+      font-size: clamp(12px, 0.95vw, 14px);
+      line-height: 1.5;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 249, 240, 0.72);
+      text-align: center;
+    }
+
+    .services-detailed-cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 168px;
+      min-height: 52px;
+      padding: 0 24px;
+      border: 1.5px solid rgba(255, 255, 255, 0.92);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff9f0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition:
+        background-color 180ms ease,
+        color 180ms ease,
+        transform 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .services-detailed-cta-button:hover,
+    .services-detailed-cta-button:focus-visible {
+      background: #fff9f0;
+      color: #d45d1f;
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(128, 56, 0, 0.16);
+      outline: none;
+    }
+
+    .services-detailed-footer-wrap {
+      width: 100%;
+      margin-top: 0;
+      align-self: stretch;
+    }
+
+    .main-page-dots {
+      position: fixed;
+      top: 50%;
+      right: clamp(18px, 2vw, 28px);
+      z-index: 125;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transform: translateY(-50%);
+    }
+
+    .main-page-dot {
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.94);
+      border-radius: 999px;
+      background: transparent;
+      cursor: pointer;
+      transition:
+        background-color 180ms ease,
+        transform 180ms ease,
+        opacity 180ms ease;
+    }
+
+    .main-page-dot:hover,
+    .main-page-dot:focus-visible {
+      background: rgba(255, 255, 255, 0.56);
+      outline: none;
+    }
+
+    .main-page-dot.is-active {
+      background: #ffffff;
+      transform: scale(1.15);
+    }
+
+    .services-detailed-stage:nth-of-type(even) .services-detailed-panel:not(.services-detailed-panel--footer),
+    .services-detailed-stage:nth-of-type(even) .services-detailed-feature-row {
+      grid-template-columns: minmax(320px, 1.12fr) minmax(280px, 0.88fr);
+    }
+
+    .services-detailed-stage:nth-of-type(even) .services-detailed-copy {
+      order: 2;
+    }
+
+    .services-detailed-stage:nth-of-type(even) .services-detailed-visual {
+      order: 1;
+    }
+
+    @media (max-width: 960px) {
+      .main-brand-lockup {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+      }
+
+      .main-stage-top {
+        top: 18px;
+        left: 18px;
+        right: 18px;
+        min-height: auto;
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+      }
+
+      .main-page .site-nav {
+        gap: 12px 20px;
+      }
+
+      .services-detailed-panel {
+        width: calc(100vw - 32px);
+        min-height: 100vh;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 132px 0 92px;
+      }
+
+      .services-detailed-panel--footer {
+        min-height: 100vh;
+        gap: 28px;
+        padding: 132px 0 20px;
+      }
+
+      .services-detailed-feature-row {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .services-detailed-stage:nth-of-type(even) .services-detailed-copy,
+      .services-detailed-stage:nth-of-type(even) .services-detailed-visual {
+        order: initial;
+      }
+
+      .services-detailed-visual {
+        justify-content: flex-start;
+      }
+
+      .services-detailed-number {
+        font-size: clamp(84px, 24vw, 150px);
+      }
+
+      .services-detailed-video-slot {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .main-page .page {
+        padding: 0;
+      }
+
+      .main-shell {
+        width: calc(100vw - 32px);
+        min-height: 100vh;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .services-detailed-panel {
+        padding: 120px 0 76px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="neutral-theme-overrides.css" />
+</head>
+<body class="main-page">
+  <div class="main-corner-anchor page-load-reveal" style="--reveal-delay: 100ms;" aria-hidden="true">
+    <img class="main-corner-asset" src="./ASSETS/CornerAsset.png" alt="" aria-hidden="true" />
+  </div>
+
+  <div class="main-page-dots page-load-reveal" style="--reveal-delay: 180ms;" aria-label="Page progress">
+    <button class="main-page-dot is-active" type="button" data-target="0" aria-label="Go to CNC Lathe"></button>
+    <button class="main-page-dot" type="button" data-target="1" aria-label="Go to CNC Mill"></button>
+    <button class="main-page-dot" type="button" data-target="2" aria-label="Go to Injection Molding"></button>
+    <button class="main-page-dot" type="button" data-target="3" aria-label="Go to 3D Printing"></button>
+  </div>
+
+  <main class="page">
+    <div class="main-shell">
+      <header class="main-stage-top page-load-reveal" style="--reveal-delay: 40ms;" aria-label="Site header">
+        <div class="main-brand-lockup">
+          <a class="main-home-link" href="./main.html" aria-label="Return to main page">
+            <img class="main-logo-corner" src="./ASSETS/acme.png" alt="ACME logo" />
+          </a>
+        </div>
+
+        <nav class="site-nav" aria-label="Primary">
+          <a class="nav-link" href="./about.html">ABOUT</a>
+          <div class="nav-dropdown">
+            <a class="nav-link" href="./services.html">SERVICES</a>
+            <div class="nav-dropdown-menu" aria-label="Services links">
+              <a class="nav-dropdown-link" href="./services.html">Interactive Overview</a>
+              <a class="nav-dropdown-link" href="./services-detailed.html" aria-current="page">Full Service Breakdown</a>
+            </div>
+          </div>
+          <a class="nav-link" href="./news.html">NEWS</a>
+          <a class="nav-link" href="./contact.html">CONTACT</a>
+        </nav>
+      </header>
+
+      <section class="services-detailed-stage" id="services-detailed-lathe" aria-labelledby="cnc-lathe-title">
+        <div class="services-detailed-panel page-load-reveal" style="--reveal-delay: 120ms;">
+          <div class="services-detailed-copy">
+            <p class="services-detailed-kicker">Services</p>
+            <h1 class="services-detailed-title" id="cnc-lathe-title">CNC Lathe</h1>
+            <p class="services-detailed-summary">Precision turning for cylindrical components, repeatable tolerances, and clean production runs that handle everything from prototypes to consistent batch work. This is a strong fit when dimensions need to stay consistent across many parts and the finished surface has to stay clean and controlled.</p>
+            <p class="services-detailed-usage">Use it for shafts, bushings, spacers, threaded parts, collars, and any turned geometry that needs stable concentricity with efficient repeatability.</p>
+            <div class="services-detailed-cta">
+              <p class="services-detailed-cta-label">Ready to see what we can do for you?</p>
+              <a class="services-detailed-cta-button" href="./contact.html">Let's chat</a>
+            </div>
+          </div>
+          <div class="services-detailed-visual" aria-hidden="true">
+            <div class="services-detailed-video-slot"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="services-detailed-stage" id="services-detailed-mill" aria-labelledby="cnc-mill-title">
+        <div class="services-detailed-panel page-load-reveal" style="--reveal-delay: 140ms;">
+          <div class="services-detailed-copy">
+            <p class="services-detailed-kicker">Services</p>
+            <h2 class="services-detailed-title" id="cnc-mill-title">CNC Mill</h2>
+            <p class="services-detailed-summary">Versatile milling for complex geometry, pockets, faces, and contours with a workflow tuned for speed, accuracy, and dependable finish quality. It is ideal for parts that need pockets, slots, step features, and detailed surface work in one setup.</p>
+            <p class="services-detailed-usage">Use it for brackets, housings, plates, prototypes, fixtures, and parts with pockets, holes, milled steps, and multi-face geometry.</p>
+            <div class="services-detailed-cta">
+              <p class="services-detailed-cta-label">Ready to see what we can do for you?</p>
+              <a class="services-detailed-cta-button" href="./contact.html">Let's chat</a>
+            </div>
+          </div>
+          <div class="services-detailed-visual" aria-hidden="true">
+            <video class="services-detailed-video-slot" autoplay muted loop playsinline>
+              <source src="./ASSETS/videos/cncmill.mp4" type="video/mp4" />
+            </video>
+          </div>
+        </div>
+      </section>
+
+      <section class="services-detailed-stage" id="services-detailed-injection-molding" aria-labelledby="injection-molding-title">
+        <div class="services-detailed-panel page-load-reveal" style="--reveal-delay: 160ms;">
+          <div class="services-detailed-copy">
+            <p class="services-detailed-kicker">Services</p>
+            <h2 class="services-detailed-title" id="injection-molding-title">Injection Molding</h2>
+            <p class="services-detailed-summary">High-volume plastic part production with reliable consistency, strong repeatability, and a path from tooling through finished components. Once tooling is set, it becomes a dependable way to produce parts at scale with low variation.</p>
+            <p class="services-detailed-usage">Use it for consumer housings, clips, caps, enclosures, structural plastic parts, and repeated production runs where consistency matters most.</p>
+            <div class="services-detailed-cta">
+              <p class="services-detailed-cta-label">Ready to see what we can do for you?</p>
+              <a class="services-detailed-cta-button" href="./contact.html">Let's chat</a>
+            </div>
+          </div>
+          <div class="services-detailed-visual" aria-hidden="true">
+            <div class="services-detailed-video-slot"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="services-detailed-stage" id="services-detailed-3d-printing" aria-labelledby="3d-printing-title">
+        <div class="services-detailed-panel services-detailed-panel--footer page-load-reveal" style="--reveal-delay: 180ms;">
+          <div class="services-detailed-feature-row">
+            <div class="services-detailed-copy">
+              <p class="services-detailed-kicker">Services</p>
+              <h2 class="services-detailed-title" id="3d-printing-title">3D Printing</h2>
+              <p class="services-detailed-summary">Rapid additive fabrication for concept models, fit checks, and functional prototypes when you want to move quickly and validate ideas early. It is a flexible way to test form, fit, and function before committing to a larger production path.</p>
+              <p class="services-detailed-usage">Use it for concept models, iterative prototypes, lightweight fixtures, custom test pieces, and short-run parts that need to be turned around quickly.</p>
+              <div class="services-detailed-cta">
+                <p class="services-detailed-cta-label">Ready to see what we can do for you?</p>
+                <a class="services-detailed-cta-button" href="./contact.html">Let's chat</a>
+              </div>
+            </div>
+            <div class="services-detailed-visual" aria-hidden="true">
+              <div class="services-detailed-video-slot"></div>
+            </div>
+          </div>
+          <div class="services-detailed-footer-wrap">
+            <footer class="page-site-footer" aria-label="Site footer">
+              <div class="page-site-footer__inner">
+                <div class="page-site-footer__brand">
+                  <img class="page-site-footer__logo" src="./assets/acme.png" alt="ACME logo" />
+                </div>
+                <div class="page-site-footer__social" aria-label="Social media">
+                  <div class="page-site-footer__social-links">
+                    <button class="page-site-footer__social-button" type="button" aria-label="Instagram">
+                      <svg class="page-site-footer__social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect>
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle>
+                      </svg>
+                    </button>
+                    <button class="page-site-footer__social-button" type="button" aria-label="Facebook">
+                      <svg class="page-site-footer__social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M13.4 20.5v-7h2.3l.35-2.8H13.4V8.95c0-.81.23-1.36 1.39-1.36h1.48V5.1c-.26-.04-1.14-.1-2.17-.1-2.15 0-3.62 1.31-3.62 3.73v1.97H8v2.8h2.52v7h2.88Z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <p class="page-site-footer__copy">Copyright &copy; ACME Mold Ltd. All Rights Reserved</p>
+                </div>
+                <div class="page-site-footer__credit" aria-label="Zezu logo">
+                  <img class="page-site-footer__creator-logo" src="./assets/zezu.png" alt="Zezu logo" />
+                  <p class="page-site-footer__creator-label">Site created by</p>
+                </div>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const body = document.body;
+      if (!body) {
+        return;
+      }
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        body.classList.add("is-page-ready");
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          body.classList.add("is-page-ready");
+        });
+      });
+    })();
+
+    (() => {
+      const page = document.querySelector(".main-page .page");
+      const sections = Array.from(document.querySelectorAll(".services-detailed-stage"));
+      const dots = Array.from(document.querySelectorAll(".main-page-dot"));
+
+      if (!page || sections.length === 0 || dots.length === 0) {
+        return;
+      }
+
+      let activeIndex = 0;
+      let isNavigating = false;
+      let unlockTimer = null;
+
+      function updateDots(index) {
+        dots.forEach((dot, dotIndex) => {
+          const isActive = dotIndex === index;
+          dot.classList.toggle("is-active", isActive);
+        });
+      }
+
+      function setActive(index) {
+        activeIndex = Math.max(0, Math.min(index, sections.length - 1));
+        updateDots(activeIndex);
+      }
+
+      function goTo(index, behavior = "smooth") {
+        const clampedIndex = Math.max(0, Math.min(index, sections.length - 1));
+        isNavigating = true;
+        setActive(clampedIndex);
+        page.scrollTo({
+          top: sections[clampedIndex].offsetTop,
+          behavior,
+        });
+        window.clearTimeout(unlockTimer);
+        unlockTimer = window.setTimeout(() => {
+          isNavigating = false;
+        }, 700);
+      }
+
+      page.addEventListener("scroll", () => {
+        if (isNavigating) {
+          return;
+        }
+
+        const scrollTop = page.scrollTop;
+        let nearestIndex = 0;
+        let nearestDistance = Number.POSITIVE_INFINITY;
+
+        sections.forEach((section, index) => {
+          const distance = Math.abs(scrollTop - section.offsetTop);
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = index;
+          }
+        });
+
+        if (nearestIndex !== activeIndex) {
+          setActive(nearestIndex);
+        }
+      }, { passive: true });
+
+      dots.forEach((dot) => {
+        dot.addEventListener("click", () => {
+          goTo(Number(dot.dataset.target || 0));
+        });
+      });
+
+      window.addEventListener("resize", () => {
+        goTo(activeIndex, "auto");
+      }, { passive: true });
+
+      setActive(0);
+      goTo(0, "auto");
+    })();
+  </script>
+</body>
+</html>

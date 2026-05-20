@@ -1,0 +1,10 @@
+{
+  "name": "acme-demo-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ACME marketing site with a local news CMS",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}

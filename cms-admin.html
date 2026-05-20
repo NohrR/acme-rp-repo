@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMS Dashboard</title>
+  <link rel="icon" type="image/png" href="./assets/ACMEFavicon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body.simple-page {
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+
+    .cms-shell {
+      position: relative;
+      z-index: 1;
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      padding: clamp(40px, 6vw, 84px) 24px 84px;
+      display: grid;
+      gap: 26px;
+    }
+
+    .cms-hero,
+    .cms-panel {
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 24px 52px rgba(17, 17, 17, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .cms-hero {
+      padding: clamp(28px, 4vw, 40px);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cms-kicker {
+      margin: 0 0 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #c66b00;
+    }
+
+    .cms-title {
+      margin: 0 0 12px;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(38px, 5vw, 64px);
+      line-height: 0.98;
+      color: #111111;
+    }
+
+    .cms-copy {
+      max-width: 760px;
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.72;
+      color: rgba(17, 17, 17, 0.72);
+    }
+
+    .cms-session-status {
+      margin: 14px 0 0;
+      font-size: 14px;
+      color: rgba(17, 17, 17, 0.62);
+    }
+
+    .cms-logout {
+      min-height: 52px;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 999px;
+      background: #111111;
+      color: #ffffff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .cms-logout:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(17, 17, 17, 0.16);
+    }
+
+    .cms-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .cms-panel {
+      padding: 26px;
+    }
+
+    .cms-panel-title {
+      margin: 0 0 10px;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: clamp(24px, 2.6vw, 34px);
+      line-height: 1.08;
+      color: #111111;
+    }
+
+    .cms-panel-copy {
+      margin: 0 0 20px;
+      font-size: 15px;
+      line-height: 1.68;
+      color: rgba(17, 17, 17, 0.68);
+    }
+
+    .cms-form,
+    .cms-form-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .cms-form-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cms-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .cms-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .cms-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(17, 17, 17, 0.5);
+    }
+
+    .cms-input,
+    .cms-textarea {
+      width: 100%;
+      border: 1px solid rgba(17, 17, 17, 0.12);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #111111;
+      font: inherit;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .cms-input:focus,
+    .cms-textarea:focus {
+      border-color: rgba(255, 138, 0, 0.58);
+      box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.14);
+    }
+
+    .cms-textarea {
+      min-height: 220px;
+      resize: vertical;
+    }
+
+    .cms-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .cms-button,
+    .cms-button-secondary {
+      min-height: 50px;
+      padding: 0 20px;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    }
+
+    .cms-button {
+      border: 0;
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .cms-button-secondary {
+      border: 1px solid rgba(17, 17, 17, 0.12);
+      background: rgba(255, 255, 255, 0.86);
+      color: #111111;
+    }
+
+    .cms-button:hover,
+    .cms-button-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(17, 17, 17, 0.12);
+    }
+
+    .cms-form-status,
+    .cms-count {
+      margin: 0;
+      min-height: 22px;
+      font-size: 14px;
+      color: rgba(17, 17, 17, 0.62);
+    }
+
+    .cms-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .cms-list-empty {
+      padding: 26px;
+      text-align: center;
+      border-radius: 24px;
+      border: 1px dashed rgba(17, 17, 17, 0.16);
+      color: rgba(17, 17, 17, 0.58);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .cms-article-card {
+      padding: 22px;
+      border: 1px solid rgba(17, 17, 17, 0.08);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.84);
+      display: grid;
+      gap: 12px;
+    }
+
+    .cms-article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(17, 17, 17, 0.46);
+    }
+
+    .cms-article-title {
+      margin: 0;
+      font-family: "FuturaCyrillicBold", system-ui, sans-serif;
+      font-size: 28px;
+      line-height: 1.08;
+      color: #111111;
+    }
+
+    .cms-article-summary {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.66;
+      color: rgba(17, 17, 17, 0.72);
+    }
+
+    .cms-article-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    @media (max-width: 960px) {
+      .cms-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .cms-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="neutral-theme-overrides.css" />
+</head>
+
+<body class="simple-page">
+  <header class="topbar" role="banner">
+    <div class="nav-inner">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="nav-link" href="./about.html">ABOUT</a>
+        <div class="nav-dropdown">
+          <a class="nav-link" href="./services.html">SERVICES</a>
+          <div class="nav-dropdown-menu" aria-label="Services links">
+            <a class="nav-dropdown-link" href="./services.html">Interactive Overview</a>
+            <a class="nav-dropdown-link" href="./services-detailed.html">Full Service Breakdown</a>
+          </div>
+        </div>
+        <a class="nav-link" href="./news.html">NEWS</a>
+        <a class="nav-link" href="./contact.html">CONTACT</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="cms-shell">
+    <section class="cms-hero">
+      <div>
+        <p class="cms-kicker">News CMS</p>
+        <h1 class="cms-title">Article Dashboard</h1>
+        <p class="cms-copy">
+          Publish updates for the public News page, revise existing stories, or remove outdated content. Changes go live as soon as you save them.
+        </p>
+        <p class="cms-session-status" id="cms-session-status" aria-live="polite">Checking session...</p>
+      </div>
+
+      <button class="cms-logout" id="cms-logout" type="button">Log Out</button>
+    </section>
+
+    <section class="cms-grid">
+      <section class="cms-panel" aria-labelledby="cms-editor-title">
+        <h2 class="cms-panel-title" id="cms-editor-title">Create or Edit an Article</h2>
+        <p class="cms-panel-copy">
+          Use this form to publish a new story or update an existing one. Dates appear on the News page and articles are sorted newest first.
+        </p>
+
+        <form class="cms-form" id="cms-article-form">
+          <input id="article-id" name="articleId" type="hidden" />
+
+          <div class="cms-form-grid">
+            <div class="cms-field full">
+              <label class="cms-label" for="article-title">Headline</label>
+              <input class="cms-input" id="article-title" name="title" type="text" required />
+            </div>
+
+            <div class="cms-field">
+              <label class="cms-label" for="article-author">Author</label>
+              <input class="cms-input" id="article-author" name="author" type="text" placeholder="ACME Team" />
+            </div>
+
+            <div class="cms-field">
+              <label class="cms-label" for="article-publish-date">Publish Date</label>
+              <input class="cms-input" id="article-publish-date" name="publishDate" type="date" required />
+            </div>
+
+            <div class="cms-field full">
+              <label class="cms-label" for="article-summary">Summary</label>
+              <textarea class="cms-textarea" id="article-summary" name="summary" rows="4" required></textarea>
+            </div>
+
+            <div class="cms-field full">
+              <label class="cms-label" for="article-image-url">Image URL</label>
+              <input class="cms-input" id="article-image-url" name="imageUrl" type="url" placeholder="https://example.com/news-photo.jpg" />
+            </div>
+
+            <div class="cms-field full">
+              <label class="cms-label" for="article-content">Article Body</label>
+              <textarea class="cms-textarea" id="article-content" name="content" rows="10" required></textarea>
+            </div>
+          </div>
+
+          <div class="cms-actions">
+            <button class="cms-button" id="cms-save-button" type="submit">Publish Article</button>
+            <button class="cms-button-secondary" id="cms-reset-button" type="button">Clear Form</button>
+          </div>
+
+          <p class="cms-form-status" id="cms-form-status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="cms-panel" aria-labelledby="cms-list-title">
+        <h2 class="cms-panel-title" id="cms-list-title">Published Articles</h2>
+        <p class="cms-panel-copy">
+          Existing articles are listed here. Choose one to edit it or delete it if it should no longer appear on the public News page.
+        </p>
+        <p class="cms-count" id="cms-article-count" aria-live="polite">Loading articles...</p>
+        <div class="cms-list" id="cms-article-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="cms-admin.js"></script>
+</body>
+</html>
